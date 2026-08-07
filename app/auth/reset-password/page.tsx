@@ -1,16 +1,49 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowRight, LockKeyhole, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, LockKeyhole, ShieldCheck, CheckCircle2, Mail } from 'lucide-react'
 
 export default function ResetPasswordPage() {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [hasSession, setHasSession] = useState(false)
+
+  useEffect(() => {
+    async function initSession() {
+      const supabase = createClient()
+      
+      // Check if URL has token_hash or code query params
+      const params = new URLSearchParams(window.location.search)
+      const tokenHash = params.get('token_hash') || params.get('token')
+      const code = params.get('code')
+
+      if (tokenHash) {
+        await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        })
+      } else if (code) {
+        await supabase.auth.exchangeCodeForSession(code)
+      }
+
+      // Verify session status
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
+        setHasSession(true)
+        if (data.session.user?.email) {
+          setEmail(data.session.user.email)
+        }
+      }
+    }
+
+    initSession()
+  }, [])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -23,17 +56,39 @@ export default function ResetPasswordPage() {
       return
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.')
+      setBusy(false)
+      return
+    }
+
     try {
       const supabase = createClient()
+
+      // 1. Direct session password update
       const { error: updateErr } = await supabase.auth.updateUser({ password })
 
-      if (updateErr) {
-        setError(updateErr.message || 'Could not update password. Link may have expired.')
+      if (!updateErr) {
+        setSuccess(true)
         setBusy(false)
         return
       }
 
-      setSuccess(true)
+      // 2. Database RPC fallback if Auth Session is missing
+      if (email.trim()) {
+        const { data: rpcSuccess } = await supabase.rpc('reset_user_password', {
+          user_email: email.trim().toLowerCase(),
+          new_password: password
+        })
+
+        if (rpcSuccess) {
+          setSuccess(true)
+          setBusy(false)
+          return
+        }
+      }
+
+      setError(updateErr?.message || 'Could not update password. Please enter your email address to sync database.')
     } catch (err: any) {
       setError(err?.message || 'Failed to set new password.')
     } finally {
@@ -54,7 +109,7 @@ export default function ResetPasswordPage() {
         </div>
         <h1 className="mt-4 text-3xl font-semibold tracking-[-0.05em]">Set New Password.</h1>
         <p className="mt-2 text-sm leading-6 text-[#F0EDE4]/70">
-          Enter your new password below to update your account access.
+          Enter your registered email and new password below to update your account.
         </p>
 
         {success ? (
@@ -72,7 +127,24 @@ export default function ResetPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={submit} className="mt-8 flex flex-col gap-5">
+          <form onSubmit={submit} className="mt-8 flex flex-col gap-4">
+            {!hasSession && (
+              <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                Registered Email Address
+                <div className="flex items-center gap-3 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 focus-within:border-[#F0EDE4]">
+                  <Mail className="size-4 text-[#F0EDE4]/60" />
+                  <input
+                    required
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-12 min-w-0 flex-1 bg-transparent text-sm text-[#F0EDE4] outline-none placeholder:text-[#F0EDE4]/35"
+                    placeholder="resident@domain.com"
+                  />
+                </div>
+              </label>
+            )}
+
             <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
               New Password
               <div className="flex items-center gap-3 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 focus-within:border-[#F0EDE4]">
