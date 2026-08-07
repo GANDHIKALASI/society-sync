@@ -63,7 +63,11 @@ export default function SignUpPage() {
       })
 
       if (error) {
-        setMessage(error.message || 'We could not create that account. Please verify your details.')
+        if (error.message.includes('rate limit')) {
+          setMessage('Supabase Email Rate Limit Exceeded. To fix: Open Supabase Dashboard -> Authentication -> Providers -> Email -> Uncheck "Confirm Email" and click Save.')
+        } else {
+          setMessage(error.message || 'We could not create that account. Please verify your details.')
+        }
         setBusy(false)
         return
       }
