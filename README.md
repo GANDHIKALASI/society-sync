@@ -7,7 +7,7 @@
 
   <br />
 
-  <img src="public/homepage_preview.png" alt="SocietySync Application Showcase" width="100%" style="border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.4);" />
+  <img src="public/homepage_preview.jpg" alt="SocietySync Application Showcase" width="100%" style="border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.4);" />
 
 </div>
 
@@ -23,10 +23,10 @@
 
 SocietySync features dedicated, color-coded visual workspaces tailored to each user role:
 
-- 💎 **Super Admin Panel (`#21F1A8` Tiffany & Obsidian Emerald)**  
+- 💎 **Super Admin Panel (`#21F1A8` Tiffany & Deep Obsidian Emerald)**  
   Executive administration, resident directory approvals, staff management, notice broadcasts, and maintenance billing ledgers.
 
-- 🍏 **Resident Panel (`#E4FD97` Lime Sprout & Dark Forest)**  
+- 🍏 **Resident Panel (`#D7F36B` Lime Sprout & Deep Midnight Forest)**  
   Digital visitor pass generation with security codes, maintenance bill UPI payments, service ticket tracking, and community events.
 
 - 🍑 **Employee Panel (`#FFC6A8` Bridal Skin Tone & Deep Mahogany)**  
