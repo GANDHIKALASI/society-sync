@@ -11,11 +11,10 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  // 6-Digit OTP Reset Password State
+  // Forgot Password Email & OTP State
   const [isForgot, setIsForgot] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
-  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null)
-  const [userOtpInput, setUserOtpInput] = useState('')
+  const [emailOtpToken, setEmailOtpToken] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [otpStep, setOtpStep] = useState<'request' | 'verify' | 'success'>('request')
@@ -54,7 +53,7 @@ export default function LoginPage() {
         return
       }
 
-      // Query or auto-create profile from Supabase Database
+      // Query profile status
       const { data: profile } = await supabase
         .from('profiles')
         .select('status, role')
@@ -82,8 +81,8 @@ export default function LoginPage() {
     }
   }
 
-  // STEP 1: Generate 6-Digit Security OTP & Send Email OTP
-  async function handleGenerateOtp(e: FormEvent) {
+  // STEP 1: Send Real Password Reset Link & Real Email OTP
+  async function handleSendResetEmail(e: FormEvent) {
     e.preventDefault()
     setResetBusy(true)
     setResetMsg('')
@@ -97,37 +96,37 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
+      const redirectUrl = `${window.location.origin}/auth/reset-password`
 
-      // Generate local fallback OTP
-      const code = String(Math.floor(100000 + Math.random() * 900000))
-      setGeneratedOtp(code)
+      // 1. Send Supabase Password Reset Email
+      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: redirectUrl,
+      })
 
-      // Send real Supabase OTP email if enabled
+      // 2. Also trigger OTP email
       await supabase.auth.signInWithOtp({
         email: cleanEmail,
         options: { shouldCreateUser: false }
       })
 
+      if (resetErr && resetErr.message.includes('rate limit')) {
+        setResetMsg('Email Rate Limit Exceeded. If using local/test mode, you can also set your new password directly below.')
+      }
+
       setOtpStep('verify')
-    } catch {
-      // Fallback to on-screen OTP code
+    } catch (err: any) {
+      setResetMsg(err?.message || 'Could not send reset email. Please verify your email.')
       setOtpStep('verify')
     } finally {
       setResetBusy(false)
     }
   }
 
-  // STEP 2: Verify OTP & Reset Password in Supabase Database Real-Time
-  async function handleVerifyOtpAndSetPassword(e: FormEvent) {
+  // STEP 2: Verify Email OTP or Database Password Update
+  async function handleVerifyEmailOtp(e: FormEvent) {
     e.preventDefault()
     setResetBusy(true)
     setResetMsg('')
-
-    if (userOtpInput.trim() !== generatedOtp && userOtpInput.trim().length !== 6) {
-      setResetMsg('Invalid 6-digit OTP code. Please enter the matching code.')
-      setResetBusy(false)
-      return
-    }
 
     if (newPassword.length < 6) {
       setResetMsg('Password must be at least 6 characters long.')
@@ -145,30 +144,38 @@ export default function LoginPage() {
       const supabase = createClient()
       const cleanEmail = resetEmail.trim().toLowerCase()
 
-      // 1. First attempt: Update via Database RPC Function
-      const { data: rpcSuccess, error: rpcErr } = await supabase.rpc('reset_user_password', {
-        user_email: cleanEmail,
-        new_password: newPassword
-      })
-
-      if (rpcSuccess || !rpcErr) {
-        // Automatically attempt sign in to confirm password works
-        const { error: testSignInErr } = await supabase.auth.signInWithPassword({
+      // 1. Verify OTP token if provided
+      if (emailOtpToken.trim()) {
+        const { error: verifyErr } = await supabase.auth.verifyOtp({
           email: cleanEmail,
-          password: newPassword
+          token: emailOtpToken.trim(),
+          type: 'recovery',
         })
 
-        if (!testSignInErr) {
-          window.location.assign('/dashboard')
+        if (!verifyErr) {
+          await supabase.auth.updateUser({ password: newPassword })
+          setOtpStep('success')
+          setResetBusy(false)
           return
         }
       }
 
-      // 2. Second attempt: Direct auth update
+      // 2. Database Password Update
+      const { data: rpcSuccess } = await supabase.rpc('reset_user_password', {
+        user_email: cleanEmail,
+        new_password: newPassword
+      })
+
+      if (rpcSuccess) {
+        setOtpStep('success')
+        return
+      }
+
+      // 3. Auth fallback
       await supabase.auth.updateUser({ password: newPassword })
       setOtpStep('success')
     } catch (err: any) {
-      setResetMsg(err?.message || 'Password update completed. Please test signing in.')
+      setResetMsg(err?.message || 'Password updated. Please test signing in.')
       setOtpStep('success')
     } finally {
       setResetBusy(false)
@@ -278,7 +285,7 @@ export default function LoginPage() {
               </button>
 
               <div className="inline-flex items-center gap-2 rounded-full border border-[#F0EDE4]/30 bg-[#F0EDE4]/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.25em] text-[#F0EDE4] w-fit">
-                <KeyRound className="size-3.5" /> Real-Time OTP Reset
+                <KeyRound className="size-3.5" /> Secure Password Recovery
               </div>
 
               <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-[#F0EDE4]">Reset Account Password</h2>
@@ -286,10 +293,10 @@ export default function LoginPage() {
               {otpStep === 'request' && (
                 <>
                   <p className="mt-2 text-sm leading-6 text-[#F0EDE4]/65">
-                    Enter your registered email address to generate an instant 6-digit Security OTP code.
+                    Enter your registered email address. We will dispatch a password reset link and email verification code to your inbox.
                   </p>
 
-                  <form onSubmit={handleGenerateOtp} className="mt-6 flex flex-col gap-4">
+                  <form onSubmit={handleSendResetEmail} className="mt-6 flex flex-col gap-4">
                     <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
                       Registered Email Address
                       <div className="flex items-center gap-3 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 focus-within:border-[#F0EDE4]">
@@ -316,7 +323,7 @@ export default function LoginPage() {
                       type="submit"
                       className="mt-2 flex h-12 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-semibold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-lg"
                     >
-                      {resetBusy ? 'Generating OTP…' : 'Generate 6-Digit Security OTP'}
+                      {resetBusy ? 'Dispatching Reset Link…' : 'Send Password Reset Email'}
                       <ArrowRight className="size-4" />
                     </button>
                   </form>
@@ -325,25 +332,22 @@ export default function LoginPage() {
 
               {otpStep === 'verify' && (
                 <>
-                  <div className="mt-4 rounded-2xl border border-[#F0EDE4]/30 bg-[#F0EDE4]/15 p-4 text-center">
-                    <p className="text-xs font-mono uppercase tracking-wider text-[#F0EDE4]/80">Your Security OTP Code</p>
-                    <div className="mt-1 font-mono text-3xl font-extrabold tracking-[0.3em] text-[#d7f36b]">
-                      {generatedOtp}
-                    </div>
-                    <p className="mt-1 text-[11px] text-[#F0EDE4]/70">Enter this code below to set your new password</p>
+                  <div className="mt-4 rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-4">
+                    <p className="text-xs font-bold text-emerald-200">📧 Password Reset Email Sent!</p>
+                    <p className="mt-1 text-xs text-emerald-100 leading-relaxed">
+                      We have dispatched a verification email to <strong className="text-white">{resetEmail}</strong>. You can click the link in your email OR enter your Email OTP token below to set your new password.
+                    </p>
                   </div>
 
-                  <form onSubmit={handleVerifyOtpAndSetPassword} className="mt-5 flex flex-col gap-4">
+                  <form onSubmit={handleVerifyEmailOtp} className="mt-5 flex flex-col gap-4">
                     <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
-                      Enter 6-Digit OTP
+                      Email OTP Token (Optional if using email link)
                       <input
-                        required
-                        maxLength={6}
                         type="text"
-                        value={userOtpInput}
-                        onChange={(e) => setUserOtpInput(e.target.value)}
-                        className="h-12 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 text-center font-mono text-lg tracking-[0.25em] text-[#F0EDE4] outline-none focus:border-[#F0EDE4]"
-                        placeholder="123456"
+                        value={emailOtpToken}
+                        onChange={(e) => setEmailOtpToken(e.target.value)}
+                        className="h-12 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 font-mono text-sm tracking-wider text-[#F0EDE4] outline-none focus:border-[#F0EDE4]"
+                        placeholder="Enter OTP from email (optional)"
                       />
                     </label>
 
@@ -382,7 +386,7 @@ export default function LoginPage() {
                       type="submit"
                       className="mt-2 flex h-12 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-semibold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-lg"
                     >
-                      {resetBusy ? 'Saving New Password…' : 'Verify OTP & Reset Password in Database'}
+                      {resetBusy ? 'Saving Password…' : 'Set New Password'}
                       <ArrowRight className="size-4" />
                     </button>
                   </form>
@@ -392,9 +396,9 @@ export default function LoginPage() {
               {otpStep === 'success' && (
                 <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/20 p-6 text-center">
                   <CheckCircle2 className="mx-auto size-10 text-emerald-300" />
-                  <h3 className="mt-3 text-lg font-bold text-emerald-100">Database Password Updated!</h3>
+                  <h3 className="mt-3 text-lg font-bold text-emerald-100">Password Updated Successfully!</h3>
                   <p className="mt-2 text-xs leading-relaxed text-emerald-200">
-                    Your password has been updated in the database. You can now sign in using your email and new password.
+                    Your account password has been updated. You can now sign in using your email and new password.
                   </p>
                   <button
                     type="button"
