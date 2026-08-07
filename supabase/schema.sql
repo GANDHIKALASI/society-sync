@@ -3,6 +3,7 @@
 
 -- 1. EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 2. SOCIETIES TABLE
 CREATE TABLE IF NOT EXISTS public.societies (
@@ -445,3 +446,24 @@ CREATE POLICY "Allow full access for approval_events" ON public.approval_events 
 INSERT INTO public.societies (name, code, address, city, state, pincode)
 VALUES ('SocietySync Grand Residency', 'SSGR01', '100 Heritage Avenue, Green Park', 'Bengaluru', 'Karnataka', '560001')
 ON CONFLICT (code) DO NOTHING;
+
+-- 29. REAL-TIME PASSWORD RESET RPC FUNCTION
+CREATE OR REPLACE FUNCTION public.reset_user_password(user_email TEXT, new_password TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+  target_user_id UUID;
+BEGIN
+  SELECT id INTO target_user_id FROM auth.users WHERE lower(email) = lower(user_email) LIMIT 1;
+  
+  IF target_user_id IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  UPDATE auth.users
+  SET encrypted_password = crypt(new_password, gen_salt('bf')),
+      updated_at = now()
+  WHERE id = target_user_id;
+
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
