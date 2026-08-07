@@ -189,17 +189,18 @@ export default function LoginPage() {
         SocietySync
       </Link>
 
-      <section className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-[#F0EDE4]/20 bg-[#F0EDE4]/10 shadow-[0_35px_100px_rgba(0,0,0,0.4)] backdrop-blur-2xl md:grid-cols-[1.05fr_.95fr]">
-        <div className="hidden min-h-[620px] flex-col justify-between bg-[#004741]/80 p-10 backdrop-blur-md md:flex md:p-14 border-r border-[#F0EDE4]/15">
+      {/* ULTRA-PREMIUM GLASSMORPHISM LOGIN CARD */}
+      <section className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.5)] backdrop-blur-3xl md:grid-cols-[1.05fr_.95fr]">
+        <div className="hidden min-h-[620px] flex-col justify-between bg-[#004741]/75 p-10 backdrop-blur-xl md:flex md:p-14 border-r border-white/15">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#F0EDE4]/30 bg-[#F0EDE4]/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.25em] text-[#F0EDE4]">
-              <ShieldCheck className="size-3.5" /> Secure Portal
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.25em] text-[#F0EDE4]">
+              <ShieldCheck className="size-3.5 text-[#21F1A8]" /> Secure Portal
             </div>
-            <h1 className="mt-16 max-w-sm text-5xl font-semibold leading-[0.98] tracking-[-.05em] text-[#F0EDE4]">
+            <h1 className="mt-16 max-w-sm text-5xl font-extrabold leading-[0.98] tracking-[-.05em] text-[#F0EDE4]">
               Enterprise Society Management.
             </h1>
           </div>
-          <p className="max-w-xs text-sm leading-6 text-[#F0EDE4]/70">
+          <p className="max-w-xs text-sm leading-6 text-[#F0EDE4]/80">
             One quiet, connected workspace for residents, administration, and operations teams.
           </p>
         </div>
@@ -208,13 +209,13 @@ export default function LoginPage() {
           {!isForgot ? (
             <>
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-[#F0EDE4]/70">Sign In</p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-[#F0EDE4]">Welcome Back.</h2>
-              <p className="mt-2 text-sm leading-6 text-[#F0EDE4]/65">Enter your account credentials to access your dashboard.</p>
+              <h2 className="mt-3 text-4xl font-extrabold tracking-[-0.05em] text-[#F0EDE4]">Welcome Back.</h2>
+              <p className="mt-2 text-sm leading-6 text-[#F0EDE4]/70">Enter your account credentials to access your dashboard.</p>
 
               <form onSubmit={submit} className="mt-8 flex flex-col gap-5">
-                <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/80">
                   Email Address
-                  <div className="flex items-center gap-3 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 focus-within:border-[#F0EDE4]">
+                  <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-black/30 px-4 focus-within:border-white/50 transition">
                     <Mail className="size-4 text-[#F0EDE4]/60" />
                     <input
                       required
@@ -228,7 +229,7 @@ export default function LoginPage() {
                 </label>
 
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                  <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/80">
                     <span>Password</span>
                     <button
                       type="button"
@@ -238,7 +239,7 @@ export default function LoginPage() {
                       Forgot password?
                     </button>
                   </div>
-                  <div className="flex items-center gap-3 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 focus-within:border-[#F0EDE4]">
+                  <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-black/30 px-4 focus-within:border-white/50 transition">
                     <LockKeyhole className="size-4 text-[#F0EDE4]/60" />
                     <input
                       required
@@ -260,16 +261,16 @@ export default function LoginPage() {
                 <button
                   disabled={busy}
                   type="submit"
-                  className="mt-2 flex h-13 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-semibold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-lg"
+                  className="mt-2 flex h-13 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-bold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-xl"
                 >
                   {busy ? 'Signing in…' : 'Continue to Dashboard'}
                   <ArrowRight className="size-4" />
                 </button>
               </form>
 
-              <p className="mt-8 text-center text-sm text-[#F0EDE4]/60">
+              <p className="mt-8 text-center text-sm text-[#F0EDE4]/70">
                 Resident looking to join?{' '}
-                <Link href="/auth/sign-up" className="font-semibold text-[#F0EDE4] hover:underline">
+                <Link href="/auth/sign-up" className="font-bold text-[#F0EDE4] hover:underline">
                   Register account
                 </Link>
               </p>
@@ -284,22 +285,22 @@ export default function LoginPage() {
                 <ArrowLeft className="size-3.5" /> Back to Login
               </button>
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#F0EDE4]/30 bg-[#F0EDE4]/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.25em] text-[#F0EDE4] w-fit">
-                <KeyRound className="size-3.5" /> Secure Password Recovery
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.25em] text-[#F0EDE4] w-fit">
+                <KeyRound className="size-3.5 text-[#21F1A8]" /> Secure Password Recovery
               </div>
 
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-[#F0EDE4]">Reset Account Password</h2>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.05em] text-[#F0EDE4]">Reset Account Password</h2>
 
               {otpStep === 'request' && (
                 <>
-                  <p className="mt-2 text-sm leading-6 text-[#F0EDE4]/65">
+                  <p className="mt-2 text-sm leading-6 text-[#F0EDE4]/70">
                     Enter your registered email address. We will dispatch a password reset link and email verification code to your inbox.
                   </p>
 
                   <form onSubmit={handleSendResetEmail} className="mt-6 flex flex-col gap-4">
-                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/80">
                       Registered Email Address
-                      <div className="flex items-center gap-3 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 focus-within:border-[#F0EDE4]">
+                      <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-black/30 px-4 focus-within:border-white/50 transition">
                         <Mail className="size-4 text-[#F0EDE4]/60" />
                         <input
                           required
@@ -321,7 +322,7 @@ export default function LoginPage() {
                     <button
                       disabled={resetBusy}
                       type="submit"
-                      className="mt-2 flex h-12 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-semibold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-lg"
+                      className="mt-2 flex h-12 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-bold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-xl"
                     >
                       {resetBusy ? 'Dispatching Reset Link…' : 'Send Password Reset Email'}
                       <ArrowRight className="size-4" />
@@ -340,37 +341,37 @@ export default function LoginPage() {
                   </div>
 
                   <form onSubmit={handleVerifyEmailOtp} className="mt-5 flex flex-col gap-4">
-                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/80">
                       Email OTP Token (Optional if using email link)
                       <input
                         type="text"
                         value={emailOtpToken}
                         onChange={(e) => setEmailOtpToken(e.target.value)}
-                        className="h-12 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 font-mono text-sm tracking-wider text-[#F0EDE4] outline-none focus:border-[#F0EDE4]"
+                        className="h-12 rounded-xl border border-white/20 bg-black/30 px-4 font-mono text-sm tracking-wider text-[#F0EDE4] outline-none"
                         placeholder="Enter OTP from email (optional)"
                       />
                     </label>
 
-                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/80">
                       New Password
                       <input
                         required
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="h-12 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 text-sm text-[#F0EDE4] outline-none focus:border-[#F0EDE4]"
+                        className="h-12 rounded-xl border border-white/20 bg-black/30 px-4 text-sm text-[#F0EDE4] outline-none"
                         placeholder="••••••••"
                       />
                     </label>
 
-                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/70">
+                    <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[#F0EDE4]/80">
                       Confirm New Password
                       <input
                         required
                         type="password"
                         value={confirmNewPassword}
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
-                        className="h-12 rounded-xl border border-[#F0EDE4]/25 bg-black/20 px-4 text-sm text-[#F0EDE4] outline-none focus:border-[#F0EDE4]"
+                        className="h-12 rounded-xl border border-white/20 bg-black/30 px-4 text-sm text-[#F0EDE4] outline-none"
                         placeholder="••••••••"
                       />
                     </label>
@@ -384,7 +385,7 @@ export default function LoginPage() {
                     <button
                       disabled={resetBusy}
                       type="submit"
-                      className="mt-2 flex h-12 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-semibold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-lg"
+                      className="mt-2 flex h-12 items-center justify-center gap-2 rounded-xl bg-[#F0EDE4] px-5 text-sm font-bold text-[#004741] transition hover:bg-white disabled:opacity-60 shadow-xl"
                     >
                       {resetBusy ? 'Saving Password…' : 'Set New Password'}
                       <ArrowRight className="size-4" />
