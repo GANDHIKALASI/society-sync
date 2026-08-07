@@ -16,6 +16,7 @@ interface NavItem {
 
 const superAdminNav: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: Building2 },
+  { label: 'Community Chat', href: '/dashboard/chat', icon: MessageSquare },
   { label: 'Residents', href: '/dashboard/residents', icon: Users },
   { label: 'Employees', href: '/dashboard/employees', icon: Briefcase },
   { label: 'Salary Management', href: '/dashboard/salary', icon: DollarSign },
@@ -46,6 +47,7 @@ const superAdminNav: NavItem[] = [
 
 const residentNav: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: Building2 },
+  { label: 'Community Chat', href: '/dashboard/chat', icon: MessageSquare },
   { label: 'My Profile', href: '/dashboard/my-profile', icon: User },
   { label: 'My Flat', href: '/dashboard/my-flat', icon: Building2 },
   { label: 'Family Members', href: '/dashboard/family-members', icon: Users },
@@ -61,12 +63,12 @@ const residentNav: NavItem[] = [
   { label: 'Documents', href: '/dashboard/documents', icon: Folder },
   { label: 'Announcements', href: '/dashboard/announcements', icon: Megaphone },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { label: 'Chat', href: '/dashboard/chat', icon: MessageSquare },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
 const employeeNav: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: Building2 },
+  { label: 'Community Chat', href: '/dashboard/chat', icon: MessageSquare },
   { label: 'Assigned Tasks', href: '/dashboard/assigned-tasks', icon: CheckSquare },
   { label: 'Attendance', href: '/dashboard/attendance', icon: Clock },
   { label: 'Leave Request', href: '/dashboard/leave-request', icon: FileText },
@@ -74,7 +76,6 @@ const employeeNav: NavItem[] = [
   { label: 'Service Requests', href: '/dashboard/service-requests', icon: Wrench },
   { label: 'Documents', href: '/dashboard/documents', icon: Folder },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { label: 'Chat', href: '/dashboard/chat', icon: MessageSquare },
   { label: 'Profile', href: '/dashboard/profile', icon: User },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
