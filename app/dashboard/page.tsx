@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { ArrowUpRight, Users, Wrench, ShieldAlert, CheckSquare, Calendar, DollarSign, Building2, Megaphone } from 'lucide-react'
+import { ArrowUpRight, Users, Wrench, ShieldAlert, CheckSquare, Calendar, DollarSign, Building2, Megaphone, Clock, Sparkles } from 'lucide-react'
 import { getCurrentProfile } from '@/lib/auth'
 import { DashboardShell, type DashboardRole } from '@/components/dashboard-shell'
 import Link from 'next/link'
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'resident').eq('status', 'pending'),
       supabase.from('service_requests').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'employee'),
-      supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3),
+      supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(4),
       role === 'resident' ? supabase.from('maintenance_bills').select('*').eq('profile_id', profile.id).eq('status', 'pending') : Promise.resolve({ data: [] })
     ])
 
@@ -89,60 +89,72 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* STATS CARDS */}
+        {/* CLICKABLE DASHBOARD STATISTICS CARDS */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {role === 'super_admin' && (
             <>
-              <Stat icon={Users} label="Approved Residents" value={String(residentCount)} />
-              <Stat icon={ShieldAlert} label="Pending Approvals" value={String(pendingResidents)} highlight={Boolean(pendingResidents)} />
-              <Stat icon={Wrench} label="Open Service Tickets" value={String(openTickets)} />
-              <Stat icon={Building2} label="Active Employees" value={String(employeeCount)} />
+              <Stat href="/dashboard/residents" icon={Users} label="Approved Residents" value={String(residentCount)} />
+              <Stat href="/dashboard/residents?status=pending" icon={ShieldAlert} label="Pending Approvals" value={String(pendingResidents)} highlight={Boolean(pendingResidents)} />
+              <Stat href="/dashboard/service-requests" icon={Wrench} label="Open Service Tickets" value={String(openTickets)} />
+              <Stat href="/dashboard/employees" icon={Building2} label="Active Employees" value={String(employeeCount)} />
             </>
           )}
 
           {role === 'resident' && (
             <>
-              <Stat icon={Building2} label="Flat Assignment" value={profile.flat_number || 'Registered'} />
-              <Stat icon={DollarSign} label="Pending Bills" value={String(userBills.length)} highlight={Boolean(userBills.length)} />
-              <Stat icon={Wrench} label="Active Tickets" value={String(openTickets)} />
-              <Stat icon={ShieldAlert} label="Account Status" value="Approved" />
+              <Stat href="/dashboard/my-flat" icon={Building2} label="Flat Assignment" value={profile.flat_number || 'Registered'} />
+              <Stat href="/dashboard/maintenance" icon={DollarSign} label="Pending Bills" value={String(userBills.length)} highlight={Boolean(userBills.length)} />
+              <Stat href="/dashboard/service-requests" icon={Wrench} label="Active Tickets" value={String(openTickets)} />
+              <Stat href="/dashboard/my-profile" icon={ShieldAlert} label="Account Status" value="Approved" />
             </>
           )}
 
           {role === 'employee' && (
             <>
-              <Stat icon={CheckSquare} label="Designation" value={profile.designation || 'Staff'} />
-              <Stat icon={Wrench} label="Open Tickets" value={String(openTickets)} />
-              <Stat icon={Calendar} label="Work Shift" value="On Duty" />
-              <Stat icon={Users} label="Society Code" value="SSGR01" />
+              <Stat href="/dashboard/profile" icon={CheckSquare} label="Designation" value={profile.designation || 'Staff'} />
+              <Stat href="/dashboard/assigned-tasks" icon={Wrench} label="Open Tickets" value={String(openTickets)} />
+              <Stat href="/dashboard/attendance" icon={Calendar} label="Work Shift" value="On Duty" />
+              <Stat href="/dashboard/attendance" icon={Clock} label="Attendance Log" value="Active" />
             </>
           )}
         </div>
 
         {/* DASHBOARD CONTENT GRID */}
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
+          {/* NOTICE BOARD SECTION */}
           <div className="surface-card rounded-3xl p-6 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between border-b border-current/15 pb-4">
                 <div>
                   <h2 className="text-xl font-bold">Society Notice Board</h2>
-                  <p className="mt-1 text-xs opacity-75">Latest announcements posted by administration.</p>
+                  <p className="mt-1 text-xs opacity-75">Latest announcements posted by administration sorted by newest first.</p>
                 </div>
                 <Megaphone className="size-5 opacity-75" />
               </div>
 
               <div className="mt-4 flex flex-col gap-3">
                 {recentAnnouncements.length ? (
-                  recentAnnouncements.map((item) => (
-                    <div key={item.id} className="rounded-2xl border border-current/15 bg-black/10 p-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono uppercase tracking-wider font-bold opacity-80">{item.priority} notice</span>
-                        <span className="text-[11px] opacity-60">{new Date(item.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <h3 className="mt-2 text-base font-semibold">{item.title}</h3>
-                      <p className="mt-1 text-sm leading-relaxed opacity-80">{item.content}</p>
-                    </div>
-                  ))
+                  recentAnnouncements.map((item) => {
+                    const createdDate = item.created_at ? new Date(item.created_at) : new Date()
+                    return (
+                      <Link key={item.id} href="/dashboard/announcements" className="rounded-2xl border border-current/15 bg-black/10 p-4 transition hover:bg-black/20 block">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs font-mono uppercase tracking-wider font-bold opacity-90 px-2.5 py-0.5 rounded-full border border-current/20 bg-black/20">
+                            {item.target_role || item.priority || 'Notice'}
+                          </span>
+                          <span className="text-[11px] font-mono opacity-70">
+                            {createdDate.toLocaleDateString()} at {createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <h3 className="mt-2 text-base font-semibold">{item.title}</h3>
+                        <p className="mt-1 text-sm leading-relaxed opacity-80">{item.content}</p>
+                        <div className="mt-3 flex items-center justify-between text-[11px] font-mono opacity-60">
+                          <span>Created by: Administration</span>
+                          <span>Category: {item.target_role === 'resident' ? 'Resident Notice' : item.target_role === 'employee' ? 'Staff Notice' : 'General Announcement'}</span>
+                        </div>
+                      </Link>
+                    )
+                  })
                 ) : (
                   <div className="flex min-h-36 items-center justify-center rounded-2xl border border-dashed border-current/20 text-center">
                     <p className="text-sm opacity-75">No announcements posted yet.</p>
@@ -158,9 +170,13 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-[var(--primary)] text-[var(--secondary)] p-7 flex flex-col justify-between shadow-xl">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.2em] font-bold opacity-80">CONNECTED WORKSPACE</p>
+          {/* REDESIGNED MODERN GLASSMORPHISM WORKSPACE CARD */}
+          <div className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 p-8 shadow-2xl backdrop-blur-2xl transition duration-300 hover:scale-[1.01] flex flex-col justify-between border-opacity-30">
+            <div className="absolute -right-12 -top-12 size-40 rounded-full bg-current/10 blur-3xl" />
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 rounded-full border border-current/30 bg-black/10 px-3.5 py-1 font-mono text-xs uppercase tracking-[0.2em] font-bold">
+                <Sparkles className="size-3.5" /> Connected Workspace
+              </div>
               <h2 className="mt-6 text-3xl font-extrabold tracking-[-0.04em]">
                 {role === 'super_admin' ? 'Keep operations seamless.' : role === 'resident' ? 'Everything for your flat.' : 'Duty & Task Portal.'}
               </h2>
@@ -173,10 +189,10 @@ export default async function DashboardPage() {
               </p>
             </div>
 
-            <div className="mt-8">
+            <div className="relative z-10 mt-8">
               <Link
                 href={role === 'super_admin' ? '/dashboard/residents' : role === 'resident' ? '/dashboard/visitor-pass' : '/dashboard/attendance'}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--secondary)] text-[var(--primary)] px-5 py-3 text-sm font-bold shadow-md hover:opacity-90"
+                className="theme-button-primary inline-flex w-full items-center justify-center gap-2 py-3 text-sm font-bold shadow-xl transition hover:opacity-90"
               >
                 Go to Primary Module <ArrowUpRight className="size-4" />
               </Link>
@@ -188,14 +204,22 @@ export default async function DashboardPage() {
   )
 }
 
-function Stat({ icon: Icon, label, value, highlight = false }: { icon: any; label: string; value: string; highlight?: boolean }) {
+function Stat({ href, icon: Icon, label, value, highlight = false }: { href: string; icon: any; label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`surface-card rounded-2xl p-5 ${highlight ? 'border-amber-400/50 bg-amber-500/10' : ''}`}>
+    <Link
+      href={href}
+      className={`surface-card rounded-2xl p-5 transition duration-200 hover:scale-[1.02] hover:shadow-xl block ${
+        highlight ? 'border-amber-400/50 bg-amber-500/10' : ''
+      }`}
+    >
       <div className="flex items-center justify-between">
         <Icon className="size-5 opacity-75" />
         <span className="text-3xl font-extrabold tracking-tight">{value}</span>
       </div>
-      <p className="mt-6 text-xs font-mono uppercase tracking-wider opacity-75">{label}</p>
-    </div>
+      <p className="mt-6 text-xs font-mono uppercase tracking-wider opacity-75 flex items-center justify-between">
+        <span>{label}</span>
+        <ArrowUpRight className="size-3.5 opacity-50" />
+      </p>
+    </Link>
   )
 }

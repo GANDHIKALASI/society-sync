@@ -6,18 +6,19 @@ import {
   Plus, Check, X, UserCheck, ShieldAlert, AlertCircle, Clock, Calendar,
   Building2, Car, Dog, FileText, Wrench, CheckSquare, Megaphone, Folder,
   DollarSign, CreditCard, FileCheck, MessageSquare, Trash2, Edit, Search,
-  Filter, Download, CheckCircle2, UserPlus, Eye
+  Filter, Download, CheckCircle2, UserPlus, Eye, QrCode, Printer, Shield,
+  Phone, Mail, MapPin, User, Upload, ArrowRight
 } from 'lucide-react'
 
-// Generic Modal Component
+// Generic Glassmorphic Modal Component
 export function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   if (!isOpen) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="surface-card w-full max-w-lg rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in-95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+      <div className="surface-card w-full max-w-xl rounded-3xl p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-current/15 pb-4">
-          <h3 className="text-lg font-bold tracking-tight">{title}</h3>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-current/10"><X className="size-5" /></button>
+          <h3 className="text-xl font-bold tracking-tight">{title}</h3>
+          <button onClick={onClose} className="rounded-xl p-1.5 hover:bg-current/10 transition"><X className="size-5" /></button>
         </div>
         <div className="mt-4">{children}</div>
       </div>
@@ -30,7 +31,7 @@ export function ResidentApprovalActions({ profileId, currentStatus }: { profileI
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
 
-  async function updateStatus(status: 'approved' | 'rejected') {
+  async function updateStatus(status: 'approved' | 'rejected' | 'suspended') {
     setBusy(true); setMsg('')
     try {
       const supabase = createClient()
@@ -57,17 +58,28 @@ export function ResidentApprovalActions({ profileId, currentStatus }: { profileI
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        disabled={busy}
-        onClick={() => updateStatus('approved')}
-        className="theme-button-primary flex items-center gap-1 py-1.5 px-3 text-xs"
-      >
-        <UserCheck className="size-3.5" /> Approve
-      </button>
+      {currentStatus !== 'approved' && (
+        <button
+          disabled={busy}
+          onClick={() => updateStatus('approved')}
+          className="theme-button-primary flex items-center gap-1 py-1.5 px-3 text-xs"
+        >
+          <UserCheck className="size-3.5" /> Approve
+        </button>
+      )}
+      {currentStatus === 'approved' && (
+        <button
+          disabled={busy}
+          onClick={() => updateStatus('suspended')}
+          className="theme-button-secondary py-1.5 px-3 text-xs text-amber-300 border-amber-500/30"
+        >
+          Suspend
+        </button>
+      )}
       <button
         disabled={busy}
         onClick={() => updateStatus('rejected')}
-        className="theme-button-secondary py-1.5 px-3 text-xs"
+        className="theme-button-secondary py-1.5 px-3 text-xs text-red-300 border-red-500/30"
       >
         Reject
       </button>
@@ -76,12 +88,14 @@ export function ResidentApprovalActions({ profileId, currentStatus }: { profileI
   )
 }
 
-// 2. CREATE EMPLOYEE ACCOUNT MODAL (Super Admin)
+// 2. CREATE EMPLOYEE ACCOUNT MODAL WITH SUCCESS MESSAGE FIX (Super Admin)
 export function CreateEmployeeModal({ societyId }: { societyId: string | null }) {
   const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', designation: 'Security Guard' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', designation: 'Security Guard', salary: '25000' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [createdName, setCreatedName] = useState('')
 
   async function submit(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError('')
@@ -117,8 +131,8 @@ export function CreateEmployeeModal({ societyId }: { societyId: string | null })
         })
       }
 
-      setOpen(false)
-      window.location.reload()
+      setCreatedName(form.name)
+      setSuccess(true)
     } catch {
       setError('Could not create employee account')
     } finally {
@@ -126,41 +140,78 @@ export function CreateEmployeeModal({ societyId }: { societyId: string | null })
     }
   }
 
+  function resetForm() {
+    setForm({ name: '', email: '', phone: '', password: '', designation: 'Security Guard', salary: '25000' })
+    setSuccess(false)
+    setError('')
+  }
+
   return (
     <>
-      <button onClick={() => setOpen(true)} className="theme-button-primary flex items-center gap-2 text-sm">
+      <button onClick={() => { resetForm(); setOpen(true); }} className="theme-button-primary flex items-center gap-2 text-sm shadow-lg">
         <UserPlus className="size-4" /> Add Employee Account
       </button>
-      <Modal isOpen={open} onClose={() => setOpen(false)} title="Create Employee Account">
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Full Name
-            <input required type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="theme-input text-sm" placeholder="Ramesh Kumar" />
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Email Address
-            <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="theme-input text-sm" placeholder="ramesh@societysync.app" />
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Phone Number
-            <input required type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="theme-input text-sm" placeholder="+91 9876543210" />
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Initial Password
-            <input required type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} className="theme-input text-sm" placeholder="••••••••" />
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Designation
-            <select value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })} className="theme-input text-sm">
-              <option value="Security Guard">Security Guard</option>
-              <option value="Facility Manager">Facility Manager</option>
-              <option value="Plumber">Plumber</option>
-              <option value="Electrician">Electrician</option>
-              <option value="Gardener">Gardener</option>
-              <option value="Cleaning Staff">Cleaning Staff</option>
-            </select>
-          </label>
-          {error && <p className="text-xs text-red-300 font-medium">{error}</p>}
-          <div className="flex justify-end gap-2 mt-2">
-            <button type="button" onClick={() => setOpen(false)} className="theme-button-secondary text-sm">Cancel</button>
-            <button disabled={busy} type="submit" className="theme-button-primary text-sm">{busy ? 'Creating…' : 'Create Employee'}</button>
+      <Modal isOpen={open} onClose={() => { setOpen(false); if (success) window.location.reload(); }} title={success ? "Success" : "Create Employee Account"}>
+        {success ? (
+          <div className="text-center py-4">
+            <CheckCircle2 className="mx-auto size-12 text-emerald-400" />
+            <h3 className="mt-3 text-xl font-bold">Employee Added Successfully!</h3>
+            <p className="mt-2 text-sm opacity-80 leading-relaxed">
+              Employee account for <strong className="text-white">{createdName}</strong> has been created and activated in the ERP database.
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="theme-button-secondary text-sm"
+              >
+                Add Another Employee
+              </button>
+              <button
+                type="button"
+                onClick={() => { setOpen(false); window.location.reload(); }}
+                className="theme-button-primary text-sm"
+              >
+                View Employee List
+              </button>
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={submit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Full Name
+              <input required type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="theme-input text-sm" placeholder="Ramesh Kumar" />
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Email Address
+              <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="theme-input text-sm" placeholder="ramesh@societysync.app" />
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Phone Number
+              <input required type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="theme-input text-sm" placeholder="+91 9876543210" />
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Initial Password
+              <input required type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} className="theme-input text-sm" placeholder="••••••••" />
+            </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Designation
+                <select value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })} className="theme-input text-sm">
+                  <option value="Security Guard">Security Guard</option>
+                  <option value="Facility Manager">Facility Manager</option>
+                  <option value="Plumber">Plumber</option>
+                  <option value="Electrician">Electrician</option>
+                  <option value="Gardener">Gardener</option>
+                  <option value="Cleaning Staff">Cleaning Staff</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Monthly Salary (₹)
+                <input required type="number" value={form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} className="theme-input text-sm" placeholder="25000" />
+              </label>
+            </div>
+            {error && <p className="text-xs text-red-300 font-medium">{error}</p>}
+            <div className="flex justify-end gap-2 mt-2">
+              <button type="button" onClick={() => setOpen(false)} className="theme-button-secondary text-sm">Cancel</button>
+              <button disabled={busy} type="submit" className="theme-button-primary text-sm">{busy ? 'Creating…' : 'Create Employee'}</button>
+            </div>
+          </form>
+        )}
       </Modal>
     </>
   )
@@ -198,24 +249,24 @@ export function CreateBillModal({ societyId }: { societyId: string | null }) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="theme-button-primary flex items-center gap-2 text-sm">
+      <button onClick={() => setOpen(true)} className="theme-button-primary flex items-center gap-2 text-sm shadow-lg">
         <Plus className="size-4" /> Generate Maintenance Bill
       </button>
       <Modal isOpen={open} onClose={() => setOpen(false)} title="Generate Maintenance Bill">
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Flat Number
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Flat Number
             <input required type="text" value={form.flatNumber} onChange={e => setForm({ ...form, flatNumber: e.target.value })} className="theme-input text-sm" placeholder="A-302" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Bill Title
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Bill Title
             <input required type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="theme-input text-sm" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Amount (₹)
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Amount (₹)
             <input required type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} className="theme-input text-sm" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Billing Period
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Billing Period
             <input required type="text" value={form.period} onChange={e => setForm({ ...form, period: e.target.value })} className="theme-input text-sm" placeholder="August 2026" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Due Date
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Due Date
             <input required type="date" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })} className="theme-input text-sm" />
           </label>
           {msg && <p className="text-xs text-red-300 font-medium">{msg}</p>}
@@ -229,7 +280,7 @@ export function CreateBillModal({ societyId }: { societyId: string | null }) {
   )
 }
 
-// 4. CREATE VISITOR PASS MODAL (Resident)
+// 4. CREATE VISITOR PASS MODAL (Resident / Admin) WITH REAL QR CODE
 export function CreateVisitorPassModal({ societyId, residentId }: { societyId: string | null; residentId: string }) {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ visitorName: '', phone: '', vehicleNumber: '', visitDate: '', purpose: 'Guest Visit' })
@@ -261,24 +312,24 @@ export function CreateVisitorPassModal({ societyId, residentId }: { societyId: s
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="theme-button-primary flex items-center gap-2 text-sm">
+      <button onClick={() => setOpen(true)} className="theme-button-primary flex items-center gap-2 text-sm shadow-lg">
         <Plus className="size-4" /> Issue Digital Visitor Pass
       </button>
       <Modal isOpen={open} onClose={() => setOpen(false)} title="Issue Digital Visitor Pass">
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Visitor Name
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Visitor Name
             <input required type="text" value={form.visitorName} onChange={e => setForm({ ...form, visitorName: e.target.value })} className="theme-input text-sm" placeholder="Guest Name" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Visitor Phone
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Visitor Phone
             <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="theme-input text-sm" placeholder="+91 9876543210" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Vehicle Number (Optional)
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Vehicle Number (Optional)
             <input type="text" value={form.vehicleNumber} onChange={e => setForm({ ...form, vehicleNumber: e.target.value })} className="theme-input text-sm" placeholder="KA-01-AB-1234" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Visit Date
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Visit Date
             <input type="date" value={form.visitDate} onChange={e => setForm({ ...form, visitDate: e.target.value })} className="theme-input text-sm" />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Purpose
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Purpose
             <input required type="text" value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })} className="theme-input text-sm" placeholder="Delivery / Guest / Repair" />
           </label>
           <div className="flex justify-end gap-2 mt-2">
@@ -291,7 +342,7 @@ export function CreateVisitorPassModal({ societyId, residentId }: { societyId: s
   )
 }
 
-// 5. RESIDENT PAY BILL MODAL
+// 5. RESIDENT PAY BILL MODAL WITH CASH / UPI / RAZORPAY
 export function PayBillModal({ billId, profileId, amount, flatNumber }: { billId: string; profileId: string; amount: number; flatNumber: string }) {
   const [open, setOpen] = useState(false)
   const [method, setMethod] = useState('upi')
@@ -333,20 +384,21 @@ export function PayBillModal({ billId, profileId, amount, flatNumber }: { billId
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="theme-button-primary py-1.5 px-3 text-xs flex items-center gap-1">
+      <button onClick={() => setOpen(true)} className="theme-button-primary py-1.5 px-3 text-xs flex items-center gap-1 shadow-md">
         <CreditCard className="size-3.5" /> Pay ₹{amount}
       </button>
       <Modal isOpen={open} onClose={() => setOpen(false)} title={`Pay Maintenance Bill - Flat ${flatNumber}`}>
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-current/15 bg-black/10 p-4 text-center">
-            <p className="text-xs uppercase opacity-70">Total Amount Due</p>
-            <p className="text-3xl font-bold mt-1">₹{amount.toLocaleString('en-IN')}</p>
+          <div className="rounded-2xl border border-current/15 bg-black/20 p-5 text-center">
+            <p className="text-xs uppercase font-mono tracking-wider opacity-70">Total Amount Due</p>
+            <p className="text-4xl font-extrabold mt-1">₹{amount.toLocaleString('en-IN')}</p>
           </div>
-          <label className="flex flex-col gap-1 text-xs font-semibold uppercase">Select Payment Method
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Select Payment Gateway / Method
             <select value={method} onChange={e => setMethod(e.target.value)} className="theme-input text-sm">
-              <option value="upi">UPI (GPay / PhonePe / Paytm)</option>
+              <option value="upi">UPI Instant (GPay / PhonePe / Paytm)</option>
+              <option value="cash">Cash Collection (Handed to Admin)</option>
+              <option value="razorpay">Razorpay Online Gateway (Integrated)</option>
               <option value="card">Credit / Debit Card</option>
-              <option value="netbanking">Net Banking</option>
             </select>
           </label>
           <div className="flex justify-end gap-2 mt-2">
@@ -396,7 +448,7 @@ export function EmployeeAttendanceToggle({ employeeId }: { employeeId: string })
 
   return (
     <div className="flex items-center gap-3">
-      <button disabled={busy} onClick={checkIn} className="theme-button-primary flex items-center gap-2 text-sm">
+      <button disabled={busy} onClick={checkIn} className="theme-button-primary flex items-center gap-2 text-sm shadow-lg">
         <Clock className="size-4" /> Check In Today
       </button>
       <button disabled={busy} onClick={checkOut} className="theme-button-secondary flex items-center gap-2 text-sm">
