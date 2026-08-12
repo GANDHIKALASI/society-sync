@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUpRight, Menu, ShieldCheck, Users, Wrench, MapPin, Phone, Mail, Send, Building2, Shield, Layers, Sparkles, CheckCircle2, KeyRound } from 'lucide-react'
+import { ArrowUpRight, Menu, ShieldCheck, Users, Wrench, MapPin, Phone, Mail, Send, Building2, Shield, Layers, Sparkles, CheckCircle2, KeyRound, MessageSquare, CreditCard, Clock, AlertCircle } from 'lucide-react'
 
 const videoUrl = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4'
 
@@ -48,29 +48,29 @@ export default function HomePage() {
         <div id="home" className="relative z-10 flex flex-1 items-end px-6 pb-12 pt-20 sm:px-12 lg:px-20 lg:pb-20">
           <div className="max-w-3xl">
             <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#d7f36b]/40 bg-[#082725]/60 px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.3em] text-[#d7f36b] backdrop-blur-md">
-              <ShieldCheck className="size-3.5" /> Next-Gen Society Infrastructure
+              THE OPERATING LAYER FOR BETTER COMMUNITIES
             </p>
             <h1 className="max-w-3xl text-5xl font-extrabold leading-[.95] tracking-[-0.06em] text-balance sm:text-7xl lg:text-8xl">
-              Enterprise Living. Effortlessly Connected.
+              A better place, built together.
             </h1>
             <p className="mt-7 max-w-xl text-base leading-7 text-white/85 sm:text-lg">
-              SocietySync brings residents, security teams, and society administration into one unified, high-performance workspace with real-time digital passes, maintenance ledgers, and instant gate verification.
+              SocietySync brings residents, teams, and everyday operations into one calm, connected workspace.
             </p>
             <div className="mt-9 flex flex-wrap gap-4">
               <Link href="/auth/sign-up" className="inline-flex items-center gap-2 rounded-full bg-[#d7f36b] px-6 py-3.5 text-sm font-bold text-[#153b32] hover:bg-[#e7fb91] shadow-xl transition">
-                Create Resident Account <ArrowUpRight className="size-4" />
+                Create your account <ArrowUpRight className="size-4" />
               </Link>
               <Link href="/auth/login" className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md hover:bg-white/20 transition">
-                Portal Sign In
+                Sign In
               </Link>
             </div>
           </div>
         </div>
 
         <div className="relative z-10 flex flex-wrap gap-8 border-t border-white/20 bg-[#082725]/50 px-6 py-5 text-xs font-medium text-white/80 backdrop-blur-md sm:px-12 lg:px-20">
-          <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4 text-[#d7f36b]" /> Admin-Approved Security Access</span>
-          <span className="inline-flex items-center gap-2"><Users className="size-4 text-[#d7f36b]" /> Resident-First Mobile Workspaces</span>
-          <span className="inline-flex items-center gap-2"><Wrench className="size-4 text-[#d7f36b]" /> Automated Maintenance Billing</span>
+          <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4 text-[#d7f36b]" /> Admin-approved access</span>
+          <span className="inline-flex items-center gap-2"><Users className="size-4 text-[#d7f36b]" /> Resident-first tools</span>
+          <span className="inline-flex items-center gap-2"><Wrench className="size-4 text-[#d7f36b]" /> Faster everyday work</span>
         </div>
       </section>
 
@@ -90,15 +90,15 @@ export default function HomePage() {
               <div className="mt-8 flex flex-col gap-3 font-medium text-sm text-[#153b32]/90">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="size-5 text-[#082725] shrink-0" />
-                  <span>Real-time digital gate verification with unique QR visitor passes</span>
+                  <span>Real-time Global Community Chat with instant WebSocket messaging</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="size-5 text-[#082725] shrink-0" />
-                  <span>Automated monthly maintenance bill generation and online payments</span>
+                  <span>Automated maintenance billing ledgers & instant UPI / Cash payment collection</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="size-5 text-[#082725] shrink-0" />
-                  <span>24/7 staff duty check-in, task tracking, and leave approvals</span>
+                  <span>Resident grievance complaints & 24/7 staff duty check-in attendance tracking</span>
                 </div>
               </div>
             </div>
@@ -113,29 +113,30 @@ export default function HomePage() {
                 </div>
 
                 <h3 className="mt-6 text-3xl font-extrabold text-white tracking-tight">
-                  Smart Gated Living, Built for Modern Societies.
+                  Smart Gated Living, Powered by Realtime ERP.
                 </h3>
 
                 <p className="mt-4 text-sm leading-relaxed text-white/80">
-                  SocietySync powers seamless residential management with instant digital visitor pass validation, zero-delay gate clearance, automated maintenance billing ledgers, and 24/7 staff duty coordination.
+                  SocietySync delivers an end-to-end society management ecosystem — featuring Supabase WebSockets community chat, instant QR visitor gate passes, automated maintenance billing ledgers, and resident grievance ticketing.
                 </p>
 
                 <div className="mt-8 grid grid-cols-2 gap-4">
                   <div className="rounded-2xl border border-white/15 bg-white/5 p-4 backdrop-blur-md">
-                    <p className="text-3xl font-extrabold text-[#d7f36b]">99.9%</p>
-                    <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/70">Gate Security Uptime</p>
+                    <p className="text-3xl font-extrabold text-[#d7f36b]">100%</p>
+                    <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/70">Real-Time Chat & Gate Sync</p>
                   </div>
                   <div className="rounded-2xl border border-white/15 bg-white/5 p-4 backdrop-blur-md">
                     <p className="text-3xl font-extrabold text-[#d7f36b]">Instant</p>
-                    <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/70">Visitor QR Clearance</p>
+                    <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/70">UPI Maintenance Payments</p>
                   </div>
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-2 text-xs font-mono text-[#d7f36b]">
-                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Real-Time Sync</span>
-                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Digital Gate QR</span>
-                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Automated Billing</span>
-                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Staff Attendance</span>
+                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Real-Time Community Chat</span>
+                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Complaint Ticketing</span>
+                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">UPI & Razorpay Payments</span>
+                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Digital QR Passes</span>
+                  <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-medium">Employee Salary Log</span>
                 </div>
               </div>
             </div>
@@ -149,26 +150,26 @@ export default function HomePage() {
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-3xl border border-[#153b32]/15 bg-white/70 p-8 backdrop-blur-md shadow-sm transition hover:shadow-md">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-[#082725] text-[#d7f36b]">
-                  <Building2 className="size-6" />
+                  <MessageSquare className="size-6" />
                 </div>
-                <h4 className="mt-5 font-bold text-xl">Society Management</h4>
-                <p className="mt-2.5 text-sm leading-relaxed text-[#153b32]/75">Automated block & flat mapping, resident directory tracking, and property ownership management.</p>
+                <h4 className="mt-5 font-bold text-xl">Global Community Chat</h4>
+                <p className="mt-2.5 text-sm leading-relaxed text-[#153b32]/75">Real-time WebSocket chat room linking residents, employees, and administration with live presence.</p>
               </div>
 
               <div className="rounded-3xl border border-[#153b32]/15 bg-white/70 p-8 backdrop-blur-md shadow-sm transition hover:shadow-md">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-[#082725] text-[#d7f36b]">
-                  <Shield className="size-6" />
+                  <CreditCard className="size-6" />
                 </div>
-                <h4 className="mt-5 font-bold text-xl">Admin Approval Gate</h4>
-                <p className="mt-2.5 text-sm leading-relaxed text-[#153b32]/75">Strict resident verification workflow. Account access is restricted until Super Admin approval.</p>
+                <h4 className="mt-5 font-bold text-xl">Maintenance & Billing</h4>
+                <p className="mt-2.5 text-sm leading-relaxed text-[#153b32]/75">Automated bill generation, instant payment processing via UPI/Razorpay, and receipt PDF downloads.</p>
               </div>
 
               <div className="rounded-3xl border border-[#153b32]/15 bg-white/70 p-8 backdrop-blur-md shadow-sm transition hover:shadow-md">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-[#082725] text-[#d7f36b]">
-                  <Layers className="size-6" />
+                  <AlertCircle className="size-6" />
                 </div>
-                <h4 className="mt-5 font-bold text-xl">Maintenance & Invoicing</h4>
-                <p className="mt-2.5 text-sm leading-relaxed text-[#153b32]/75">Automated monthly maintenance billing, online payment integration, and instant receipt generation.</p>
+                <h4 className="mt-5 font-bold text-xl">Complaints & Tickets</h4>
+                <p className="mt-2.5 text-sm leading-relaxed text-[#153b32]/75">Priority-based grievance logging and staff task assignments with live resolution status updates.</p>
               </div>
             </div>
           </div>
@@ -226,7 +227,7 @@ export default function HomePage() {
             {/* MODERN CONTACT FORM */}
             <div className="rounded-3xl border border-white/20 bg-white/10 p-8 backdrop-blur-2xl shadow-2xl">
               <h3 className="text-3xl font-extrabold text-white">Send a Message</h3>
-              <p className="mt-1.5 text-sm text-white/70">Fill out the form below to submit a inquiry to the SocietySync team.</p>
+              <p className="mt-1.5 text-sm text-white/70">Fill out the form below to submit an inquiry to the SocietySync team.</p>
 
               <form className="mt-7 flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); alert('Thank you! Your message has been sent to the SocietySync team.') }}>
                 <label className="flex flex-col gap-1.5 text-xs font-mono uppercase tracking-wider text-white/80">
@@ -253,14 +254,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* ULTRA-PREMIUM FOOTER */}
       <footer className="border-t border-white/15 bg-[#041a18] px-6 py-10 text-sm text-white/80 sm:px-12 lg:px-20">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 sm:flex-row">
           <div>
-            <p className="font-semibold text-white">
-              SocietySync ERP Platform
+            <p className="font-bold text-white tracking-wide">
+              SocietySync Infrastructure Networks
             </p>
-            <p className="mt-1 text-xs text-white/50">© 2026 SocietySync. All Rights Reserved.</p>
+            <p className="mt-1 text-xs text-white/60">
+              © 2026 SocietySync. Empowering Smart Gated Communities Across India. All Rights Reserved.
+            </p>
           </div>
 
           {/* SOCIAL MEDIA LINKS */}
