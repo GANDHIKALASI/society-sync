@@ -4,7 +4,8 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Send, Search, Smile, ShieldCheck, Users, Sparkles, MessageSquare,
-  Building2, ArrowDown, Radio, Clock, CheckCheck
+  Building2, ArrowDown, Radio, Clock, CheckCheck, Trash2, Eye, User,
+  Phone, Mail, MapPin, X, AlertCircle, Shield, CheckCircle2
 } from 'lucide-react'
 
 export interface ProfileData {
@@ -13,6 +14,13 @@ export interface ProfileData {
   role: 'super_admin' | 'resident' | 'employee'
   avatar_url?: string | null
   status?: string | null
+  email?: string | null
+  phone?: string | null
+  block?: string | null
+  flat_number?: string | null
+  designation?: string | null
+  occupancy_type?: string | null
+  created_at?: string | null
 }
 
 export interface ChatMessage {
@@ -35,10 +43,15 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
   const [busy, setBusy] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
+  // State for Admin Profile Viewing Modal
+  const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
+  const isAdmin = currentProfile.role === 'super_admin'
 
   // 1. Fetch initial message history
   useEffect(() => {
@@ -57,7 +70,14 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
               full_name,
               role,
               avatar_url,
-              status
+              status,
+              email,
+              phone,
+              block,
+              flat_number,
+              designation,
+              occupancy_type,
+              created_at
             )
           `)
           .order('created_at', { ascending: true })
@@ -78,7 +98,7 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
 
     loadMessages()
 
-    // 2. Real-time Subscription via Supabase Realtime
+    // 2. Real-time Subscription via Supabase Realtime (INSERT & DELETE)
     const channel = supabase
       .channel('society_community_chat')
       .on(
@@ -89,7 +109,7 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
           // Fetch sender profile for the new payload
           const { data: senderProfile } = await supabase
             .from('profiles')
-            .select('id, full_name, role, avatar_url, status')
+            .select('id, full_name, role, avatar_url, status, email, phone, block, flat_number, designation, occupancy_type, created_at')
             .eq('id', newMsg.sender_id)
             .maybeSingle()
 
@@ -104,6 +124,14 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
 
           setMessages((prev) => [...prev, fullMessage])
           scrollToBottom()
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'chat_messages' },
+        (payload) => {
+          const deletedId = payload.old.id
+          setMessages((prev) => prev.filter((m) => m.id !== deletedId))
         }
       )
       .on('presence', { event: 'sync' }, () => {
@@ -159,6 +187,47 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
       setErrorMsg('Connection error sending message.')
     } finally {
       setBusy(false)
+    }
+  }
+
+  // Delete Message (Admin Only)
+  async function handleDeleteMessage(messageId: string) {
+    if (!isAdmin) return
+    if (!confirm('Are you sure you want to delete this message?')) return
+
+    try {
+      const { error } = await supabase.from('chat_messages').delete().eq('id', messageId)
+      if (error) {
+        setErrorMsg('Could not delete message: ' + error.message)
+      } else {
+        setMessages((prev) => prev.filter((m) => m.id !== messageId))
+      }
+    } catch {
+      setErrorMsg('Error deleting message.')
+    }
+  }
+
+  // Open Profile Details Modal (Admin Only)
+  async function handleOpenProfile(profile: ProfileData | null | undefined) {
+    if (!isAdmin || !profile) return
+
+    setProfileLoading(true)
+    setSelectedProfile(profile)
+
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, role, avatar_url, status, email, phone, block, flat_number, designation, occupancy_type, created_at')
+        .eq('id', profile.id)
+        .maybeSingle()
+
+      if (data) {
+        setSelectedProfile(data as ProfileData)
+      }
+    } catch {
+      // Fallback to basic profile
+    } finally {
+      setProfileLoading(false)
     }
   }
 
@@ -258,10 +327,14 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 max-w-3xl ${isMe ? 'ml-auto flex-row-reverse' : ''}`}
+                className={`group flex gap-3 max-w-3xl ${isMe ? 'ml-auto flex-row-reverse' : ''}`}
               >
-                {/* AVATAR WITH ONLINE GREEN PRESENCE DOT */}
-                <div className="relative shrink-0">
+                {/* AVATAR WITH ONLINE GREEN PRESENCE DOT & ADMIN PROFILE CLICK */}
+                <div
+                  onClick={() => handleOpenProfile(msg.profiles || { id: msg.sender_id, full_name: senderName, role: 'resident' })}
+                  className={`relative shrink-0 ${isAdmin ? 'cursor-pointer transition hover:scale-105' : ''}`}
+                  title={isAdmin ? 'Click to view member security profile' : undefined}
+                >
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
@@ -280,13 +353,29 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
                 {/* MESSAGE BODY */}
                 <div className={`flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
                   <div className="flex items-center gap-2 px-1 text-xs">
-                    <span className="font-bold opacity-90">{senderName}</span>
+                    <span
+                      onClick={() => handleOpenProfile(msg.profiles || { id: msg.sender_id, full_name: senderName, role: 'resident' })}
+                      className={`font-bold opacity-90 ${isAdmin ? 'hover:underline cursor-pointer' : ''}`}
+                    >
+                      {senderName}
+                    </span>
                     <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-bold border ${roleInfo.style}`}>
                       {roleInfo.label}
                     </span>
                     <span className="font-mono text-[10px] opacity-60">
                       {formatTimestamp(msg.created_at)}
                     </span>
+
+                    {/* DELETE BUTTON (SUPER ADMIN ONLY) */}
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="ml-1 opacity-0 group-hover:opacity-100 p-1 text-red-300 hover:text-red-100 hover:bg-red-500/20 rounded-lg transition"
+                        title="Delete message (Admin action)"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    )}
                   </div>
 
                   <div
@@ -369,6 +458,104 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
           </button>
         </div>
       </form>
+
+      {/* 5. ADMIN PROFILE DETAILS MODAL */}
+      {selectedProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-in fade-in">
+          <div className="surface-card w-full max-w-md rounded-3xl p-6 shadow-2xl border border-white/20 bg-white/10 backdrop-blur-3xl text-current">
+            <div className="flex items-center justify-between border-b border-current/15 pb-4">
+              <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-emerald-300 font-bold">
+                <ShieldCheck className="size-4" /> Member Security Profile
+              </div>
+              <button
+                onClick={() => setSelectedProfile(null)}
+                className="rounded-xl p-1.5 hover:bg-white/10 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {profileLoading ? (
+              <div className="py-12 text-center text-sm opacity-75">Loading profile details…</div>
+            ) : (
+              <div className="mt-5 flex flex-col items-center text-center">
+                {/* PROFILE PICTURE */}
+                {selectedProfile.avatar_url ? (
+                  <img
+                    src={selectedProfile.avatar_url}
+                    alt={selectedProfile.full_name}
+                    className="size-20 rounded-3xl object-cover border-2 border-white/30 shadow-xl"
+                  />
+                ) : (
+                  <div className="flex size-20 items-center justify-center rounded-3xl bg-black/50 border-2 border-white/30 font-bold text-3xl text-white shadow-xl">
+                    {selectedProfile.full_name.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+
+                <h3 className="mt-4 text-2xl font-extrabold">{selectedProfile.full_name}</h3>
+                
+                <span className={`mt-1 rounded-full px-3 py-0.5 font-mono text-xs font-bold border ${getRoleBadge(selectedProfile.role).style}`}>
+                  {getRoleBadge(selectedProfile.role).label}
+                </span>
+
+                {/* DETAILED INFORMATION GRID */}
+                <div className="mt-6 w-full rounded-2xl border border-current/15 bg-black/25 p-4 flex flex-col gap-3 text-left text-xs font-mono">
+                  {selectedProfile.role === 'resident' && (
+                    <>
+                      <div className="flex justify-between border-b border-current/10 pb-2">
+                        <span className="opacity-70">Flat Number:</span>
+                        <span className="font-bold text-white">{selectedProfile.flat_number || 'A-101'}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-current/10 pb-2">
+                        <span className="opacity-70">Block / Tower:</span>
+                        <span className="font-bold text-white">{selectedProfile.block || 'Block A'}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-current/10 pb-2">
+                        <span className="opacity-70">Occupancy Type:</span>
+                        <span className="font-bold capitalize text-emerald-300">{selectedProfile.occupancy_type || 'Owner'}</span>
+                      </div>
+                    </>
+                  )}
+
+                  {selectedProfile.role === 'employee' && (
+                    <div className="flex justify-between border-b border-current/10 pb-2">
+                      <span className="opacity-70">Designation / Role:</span>
+                      <span className="font-bold text-amber-300">{selectedProfile.designation || 'Staff'}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between border-b border-current/10 pb-2">
+                    <span className="opacity-70">Email Address:</span>
+                    <span className="font-bold text-white">{selectedProfile.email || 'N/A'}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-current/10 pb-2">
+                    <span className="opacity-70">Phone Number:</span>
+                    <span className="font-bold text-white">{selectedProfile.phone || 'N/A'}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-current/10 pb-2">
+                    <span className="opacity-70">Account Status:</span>
+                    <span className="font-bold uppercase text-emerald-300">{selectedProfile.status || 'Approved'}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="opacity-70">Member Since:</span>
+                    <span className="opacity-90">{selectedProfile.created_at ? new Date(selectedProfile.created_at).toLocaleDateString() : 'Active Member'}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedProfile(null)}
+                  className="mt-6 w-full rounded-xl bg-[var(--primary)] text-[var(--secondary)] py-2.5 text-xs font-bold shadow-lg"
+                >
+                  Close Profile Details
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
