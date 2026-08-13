@@ -44,8 +44,7 @@ SocietySync features dedicated, color-coded visual workspaces tailored to each u
   ### **Gandhi Kalasi**
   *Full Stack Developer & AI Software Engineer*
 
-  📍 **Location:** Bhubaneswar, Odisha, India (`751001`)  
-  📞 **Phone:** `+91 7008397690`  
+  📍 **Location:** Bhubaneswar, Odisha, India  
   📧 **Email:** [gandhikalasi115@gmail.com](mailtoodcyberforce@gmail.com)
 
   [![GitHub](https://img.shields.io/badge/GitHub-GANDHIKALASI-181717?style=for-the-badge&logo=github)](https://github.com/GANDHIKALASI)
