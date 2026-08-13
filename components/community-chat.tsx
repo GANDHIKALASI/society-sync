@@ -106,24 +106,35 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
         { event: 'INSERT', schema: 'public', table: 'chat_messages' },
         async (payload) => {
           const newMsg = payload.new as ChatMessage
-          // Fetch sender profile for the new payload
-          const { data: senderProfile } = await supabase
-            .from('profiles')
-            .select('id, full_name, role, avatar_url, status, email, phone, block, flat_number, designation, occupancy_type, created_at')
-            .eq('id', newMsg.sender_id)
-            .maybeSingle()
+          
+          // Check if message is already in state
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMsg.id)) return prev
+            
+            // Fetch sender profile asynchronously if missing
+            supabase
+              .from('profiles')
+              .select('id, full_name, role, avatar_url, status, email, phone, block, flat_number, designation, occupancy_type, created_at')
+              .eq('id', newMsg.sender_id)
+              .maybeSingle()
+              .then(({ data: senderProfile }) => {
+                const fullMsg: ChatMessage = {
+                  ...newMsg,
+                  profiles: senderProfile || {
+                    id: newMsg.sender_id,
+                    full_name: 'Society Member',
+                    role: 'resident'
+                  }
+                }
+                setMessages((latest) => {
+                  if (latest.some((m) => m.id === fullMsg.id)) return latest
+                  return [...latest, fullMsg]
+                })
+                scrollToBottom()
+              })
 
-          const fullMessage: ChatMessage = {
-            ...newMsg,
-            profiles: senderProfile || {
-              id: newMsg.sender_id,
-              full_name: 'Society Member',
-              role: 'resident'
-            }
-          }
-
-          setMessages((prev) => [...prev, fullMessage])
-          scrollToBottom()
+            return prev
+          })
         }
       )
       .on(
@@ -160,7 +171,7 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
     }, 100)
   }
 
-  // Send New Message
+  // Send New Message (Instant Optimistic Display)
   async function handleSendMessage(e: FormEvent) {
     e.preventDefault()
     const cleanText = inputText.trim()
@@ -169,21 +180,68 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
     setBusy(true)
     setErrorMsg('')
 
+    const tempId = 'temp-' + Date.now()
+    const nowIso = new Date().toISOString()
+
+    // 1. Create Optimistic Message Object
+    const optimisticMsg: ChatMessage = {
+      id: tempId,
+      sender_id: currentProfile.id,
+      message: cleanText,
+      created_at: nowIso,
+      profiles: currentProfile
+    }
+
+    // 2. Instantly append to chat state (no refresh required)
+    setMessages((prev) => [...prev, optimisticMsg])
+    setInputText('')
+    setShowEmojis(false)
+    scrollToBottom()
+
     try {
-      const { error } = await supabase.from('chat_messages').insert({
-        sender_id: currentProfile.id,
-        message: cleanText,
-        created_at: new Date().toISOString()
-      })
+      // 3. Persist in database
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({
+          sender_id: currentProfile.id,
+          message: cleanText,
+          created_at: nowIso
+        })
+        .select(`
+          id,
+          sender_id,
+          message,
+          created_at,
+          society_id,
+          profiles:sender_id (
+            id,
+            full_name,
+            role,
+            avatar_url,
+            status,
+            email,
+            phone,
+            block,
+            flat_number,
+            designation,
+            occupancy_type,
+            created_at
+          )
+        `)
+        .single()
 
       if (error) {
+        // Rollback optimistic message if error occurs
+        setMessages((prev) => prev.filter((m) => m.id !== tempId))
         setErrorMsg('Failed to send message: ' + error.message)
-      } else {
-        setInputText('')
-        setShowEmojis(false)
-        scrollToBottom()
+      } else if (data) {
+        // Replace optimistic temp ID with real database record
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? (data as ChatMessage) : m))
+        )
       }
     } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId))
       setErrorMsg('Connection error sending message.')
     } finally {
       setBusy(false)
@@ -195,12 +253,13 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
     if (!isAdmin) return
     if (!confirm('Are you sure you want to delete this message?')) return
 
+    // Optimistically remove from state
+    setMessages((prev) => prev.filter((m) => m.id !== messageId))
+
     try {
       const { error } = await supabase.from('chat_messages').delete().eq('id', messageId)
       if (error) {
         setErrorMsg('Could not delete message: ' + error.message)
-      } else {
-        setMessages((prev) => prev.filter((m) => m.id !== messageId))
       }
     } catch {
       setErrorMsg('Error deleting message.')
@@ -449,7 +508,7 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
           />
 
           <button
-            disabled={busy || !inputText.trim()}
+            disabled={!inputText.trim()}
             type="submit"
             className="theme-button-primary h-12 px-5 flex items-center justify-center gap-2 text-sm shadow-xl disabled:opacity-50"
           >
