@@ -11,6 +11,7 @@ import {
   CreateRequestForm,
   CreateTaskModal,
   CreateNoticeModal,
+  DeleteAnnouncementButton,
   ApplyLeaveModal,
   EditProfileForm
 } from '@/components/dashboard-actions'
@@ -295,6 +296,10 @@ export default async function DashboardModulePage({ params }: { params: Promise<
                       <div className="flex items-center gap-3">
                         {role === 'super_admin' && module === 'residents' && rec.status === 'pending' && (
                           <ResidentApprovalActions profileId={rec.id} currentStatus={rec.status} />
+                        )}
+
+                        {role === 'super_admin' && module === 'announcements' && (
+                          <DeleteAnnouncementButton announcementId={rec.id} />
                         )}
 
                         {role === 'resident' && module === 'maintenance' && rec.status === 'pending' && (

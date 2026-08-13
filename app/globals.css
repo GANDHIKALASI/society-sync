@@ -54,8 +54,9 @@ input:focus, textarea:focus, select:focus {
   color: var(--login-card);
 }
 
-/* ROLE BASED COLOR SYSTEM - DEEP HIGH-CONTRAST GLASSMORPHISM */
-/* SUPER ADMIN PANEL: TIFFANY #21F1A8 */
+/* UNIFIED BASE TEAL / DARK-GREEN PALETTE (#041B18) WITH ROLE-SPECIFIC ACCENTS */
+
+/* SUPER ADMIN PANEL: MINT GREEN #21F1A8 ACCENT */
 .dashboard-theme.admin {
   --primary: #21F1A8;
   --secondary: #041B18;
@@ -68,30 +69,30 @@ input:focus, textarea:focus, select:focus {
   background-color: #041B18;
 }
 
-/* RESIDENT PANEL: LIME #D7F36B */
+/* RESIDENT PANEL: LIME-YELLOW #D7F36B ACCENT */
 .dashboard-theme.resident {
   --primary: #D7F36B;
-  --secondary: #0D2016;
-  --surface: #0D2016;
+  --secondary: #041B18;
+  --surface: #041B18;
   --surface-raised: rgba(215, 243, 107, 0.07);
   --accent: #D7F36B;
-  --accent-ink: #0D2016;
+  --accent-ink: #041B18;
   --border-color: rgba(215, 243, 107, 0.25);
   color: #F6FFDF;
-  background-color: #0D2016;
+  background-color: #041B18;
 }
 
-/* EMPLOYEE PANEL: SKIN TONE #FFC6A8 */
+/* EMPLOYEE PANEL: SKY BLUE / CYAN #38BDF8 ACCENT WITH UNIFIED DARK TEAL BASE #041B18 */
 .dashboard-theme.employee {
-  --primary: #FFC6A8;
-  --secondary: #230E14;
-  --surface: #230E14;
-  --surface-raised: rgba(255, 198, 168, 0.07);
-  --accent: #FFC6A8;
-  --accent-ink: #230E14;
-  --border-color: rgba(255, 198, 168, 0.25);
-  color: #FFF2EB;
-  background-color: #230E14;
+  --primary: #38BDF8;
+  --secondary: #041B18;
+  --surface: #041B18;
+  --surface-raised: rgba(56, 189, 248, 0.07);
+  --accent: #38BDF8;
+  --accent-ink: #041B18;
+  --border-color: rgba(56, 189, 248, 0.25);
+  color: #E0F2FE;
+  background-color: #041B18;
 }
 
 /* COMMON DASHBOARD STYLES */

@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Loader2, Megaphone, UserCheck, Save } from 'lucide-react'
+import { Plus, Loader2, Megaphone, UserCheck, Save, Trash2 } from 'lucide-react'
 import { Modal } from '@/components/module-views'
 
 // Export ResidentApprovalActions from module-views
@@ -335,6 +335,41 @@ export function CreateNoticeModal({ societyId, createdBy }: { societyId: string 
         </form>
       </Modal>
     </>
+  )
+}
+
+// DELETE ANNOUNCEMENT BUTTON (SUPER ADMIN ONLY)
+export function DeleteAnnouncementButton({ announcementId }: { announcementId: string }) {
+  const [busy, setBusy] = useState(false)
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!confirm('Are you sure you want to delete this announcement notice?')) return
+
+    setBusy(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from('announcements').delete().eq('id', announcementId)
+      if (!error) {
+        window.location.reload()
+      } else {
+        alert('Could not delete announcement: ' + error.message)
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <button
+      disabled={busy}
+      onClick={handleDelete}
+      className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-xl border border-red-500/30 bg-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/30 transition shadow-sm"
+      title="Delete Announcement (Admin Action)"
+    >
+      <Trash2 className="size-3.5" /> Delete Notice
+    </button>
   )
 }
 
