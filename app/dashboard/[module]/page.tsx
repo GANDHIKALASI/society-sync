@@ -11,6 +11,7 @@ import {
   EmployeeAttendanceToggle,
   CreateRequestForm,
   CreateTaskModal,
+  SubmitTaskModal,
   CreateNoticeModal,
   DeleteAnnouncementButton,
   ApplyLeaveModal,
@@ -23,6 +24,7 @@ import {
   SendPaymentNoticeModal,
   OfficialReceiptModal
 } from '@/components/dashboard-actions'
+import { formatISTDateTime, formatISTDate } from '@/lib/time'
 import Link from 'next/link'
 
 const labels: Record<string, string> = {
@@ -277,7 +279,7 @@ export default async function DashboardModulePage({ params }: { params: Promise<
                             <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                               rec.status === 'approved' || rec.status === 'completed' || rec.status === 'paid' || rec.status === 'present' || rec.status === 'occupied'
                                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                : rec.status === 'pending' || rec.status === 'open' || rec.status === 'vacant'
+                                : rec.status === 'pending' || rec.status === 'open' || rec.status === 'in_progress' || rec.status === 'submitted' || rec.status === 'vacant'
                                 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                                 : 'bg-red-500/20 text-red-300 border border-red-500/30'
                             }`}>
@@ -289,9 +291,14 @@ export default async function DashboardModulePage({ params }: { params: Promise<
                               {rec.occupancy_type}
                             </span>
                           )}
+                          {rec.priority && (
+                            <span className="rounded-full px-2 py-0.5 text-[10px] font-mono font-bold uppercase border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                              {rec.priority} Priority
+                            </span>
+                          )}
                         </div>
 
-                        <p className="mt-1 text-sm opacity-80">
+                        <p className="mt-1 text-sm opacity-80 whitespace-pre-line">
                           {rec.email || rec.description || rec.content || rec.purpose || rec.phone || (rec.amount ? `Amount: ₹${rec.amount}` : rec.breed ? `Breed: ${rec.breed}` : '')}
                         </p>
 
@@ -302,11 +309,19 @@ export default async function DashboardModulePage({ params }: { params: Promise<
                           {rec.designation && <span>Designation: {rec.designation}</span>}
                           {rec.pass_code && <span className="font-bold text-amber-300">Pass Code: {rec.pass_code}</span>}
                           {rec.due_date && <span>Due Date: {rec.due_date}</span>}
-                          {rec.created_at && <span>Timestamp: {new Date(rec.created_at).toLocaleString()}</span>}
+                          {rec.created_at && <span>Timestamp: {formatISTDateTime(rec.created_at)}</span>}
+                          {rec.check_in && <span>Check In: {formatISTDateTime(rec.check_in)}</span>}
+                          {rec.check_out && <span>Check Out: {formatISTDateTime(rec.check_out)}</span>}
+                          {rec.total_hours && <span className="font-bold text-emerald-300">Working Hours: {rec.total_hours}</span>}
                         </div>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
+                        {/* EMPLOYEE SUBMIT WORK MODAL */}
+                        {role === 'employee' && (module === 'assigned-tasks' || module === 'tasks' || module === 'employee-tasks') && rec.status !== 'completed' && (
+                          <SubmitTaskModal task={rec} />
+                        )}
+
                         {/* RESIDENT DETAILED PROFILE MODAL */}
                         {(module === 'residents' || module === 'owners' || module === 'tenants') && (
                           <ResidentProfileModal profile={rec} />

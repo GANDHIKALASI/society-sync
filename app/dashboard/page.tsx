@@ -1,18 +1,20 @@
 import { redirect } from 'next/navigation'
-import { ArrowUpRight, Users, Wrench, ShieldAlert, CheckSquare, Calendar, DollarSign, Building2, Megaphone, Clock, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Users, Wrench, ShieldAlert, CheckSquare, Calendar, DollarSign, Building2, Megaphone, Clock, Sparkles, CreditCard, AlertCircle } from 'lucide-react'
 import { getCurrentProfile } from '@/lib/auth'
 import { DashboardShell, type DashboardRole } from '@/components/dashboard-shell'
+import { formatISTDateTime, formatISTDate } from '@/lib/time'
+import { PayBillModal } from '@/components/dashboard-actions'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
   const { profile, supabase } = await getCurrentProfile()
 
   if (!profile) redirect('/auth/login')
+  if (profile.status === 'banned') redirect('/auth/login')
   if (profile.status !== 'approved') redirect('/auth/pending')
 
   const role = profile.role as DashboardRole
 
-  // Always use "Gandhi Kalasi" for Super Admin greeting if email is present
   const greetingName = (profile.full_name && !profile.full_name.includes('@'))
     ? profile.full_name.split(' ')[0]
     : (role === 'super_admin' ? 'Gandhi Kalasi' : 'Member')
@@ -24,15 +26,17 @@ export default async function DashboardPage() {
   let employeeCount = 0
   let recentAnnouncements: any[] = []
   let userBills: any[] = []
+  let employeeTasks: any[] = []
 
   try {
-    const [{ count: rCount }, { count: pCount }, { count: tCount }, { count: eCount }, { data: annData }, { data: bData }] = await Promise.all([
+    const [{ count: rCount }, { count: pCount }, { count: tCount }, { count: eCount }, { data: annData }, { data: bData }, { data: taskData }] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'resident').eq('status', 'approved'),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'resident').eq('status', 'pending'),
       supabase.from('service_requests').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'employee'),
       supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(4),
-      role === 'resident' ? supabase.from('maintenance_bills').select('*').eq('profile_id', profile.id).eq('status', 'pending') : Promise.resolve({ data: [] })
+      role === 'resident' ? supabase.from('maintenance_bills').select('*').eq('profile_id', profile.id).eq('status', 'pending') : Promise.resolve({ data: [] }),
+      role === 'employee' ? supabase.from('employee_tasks').select('*').eq('employee_id', profile.id).neq('status', 'completed') : Promise.resolve({ data: [] })
     ])
 
     residentCount = rCount || 0
@@ -41,83 +45,112 @@ export default async function DashboardPage() {
     employeeCount = eCount || 0
     recentAnnouncements = annData || []
     userBills = bData || []
+    employeeTasks = taskData || []
   } catch {
-    // Safe fallbacks
+    // Network fallback
   }
 
   return (
     <DashboardShell role={role} name={profile.full_name}>
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
+        {/* PERSONAL RESIDENT MAINTENANCE PAYMENT DUE ALERT CARD (TARGETED ONLY TO ASSIGNED RESIDENT) */}
+        {role === 'resident' && userBills.length > 0 && (
+          <div className="mb-6 rounded-3xl border-2 border-amber-400/40 bg-amber-500/15 p-6 shadow-2xl backdrop-blur-2xl animate-in fade-in">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-400 text-black font-extrabold shadow-lg">
+                  <CreditCard className="size-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-extrabold text-amber-300">Maintenance Payment Due</h3>
+                    <span className="rounded-full bg-amber-400/20 px-2.5 py-0.5 text-xs font-mono font-bold text-amber-200 uppercase border border-amber-400/30">
+                      Personal Reminder
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs opacity-90 font-mono">
+                    {userBills[0].title} ({userBills[0].period}) • Due Date: {userBills[0].due_date}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <p className="text-3xl font-extrabold text-white">₹{userBills[0].amount.toLocaleString('en-IN')}</p>
+                <PayBillModal
+                  billId={userBills[0].id}
+                  profileId={profile.id}
+                  amount={userBills[0].amount}
+                  flatNumber={userBills[0].flat_number || profile.flat_number || 'A-101'}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PERSONAL EMPLOYEE PENDING TASKS ALERT CARD */}
+        {role === 'employee' && employeeTasks.length > 0 && (
+          <div className="mb-6 rounded-3xl border-2 border-sky-400/40 bg-sky-500/15 p-6 shadow-2xl backdrop-blur-2xl animate-in fade-in">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-sky-400 text-black font-extrabold shadow-lg">
+                  <CheckSquare className="size-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-extrabold text-sky-300">Pending Duty Tasks ({employeeTasks.length})</h3>
+                    <span className="rounded-full bg-sky-400/20 px-2.5 py-0.5 text-xs font-mono font-bold text-sky-200 uppercase border border-sky-400/30">
+                      Assigned Work
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs opacity-90 font-mono">
+                    Next Task: {employeeTasks[0].title} • Due: {employeeTasks[0].due_date || 'Today'}
+                  </p>
+                </div>
+              </div>
+
+              <Link href="/dashboard/assigned-tasks" className="theme-button-primary flex items-center gap-2 text-xs py-2.5 px-4 shadow-lg">
+                View & Submit Work <ArrowUpRight className="size-4" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* HERO WELCOME BANNER */}
+        <div className="surface-card rounded-3xl p-6 sm:p-8 flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.25em] opacity-75">{role.replace('_', ' ')} OVERVIEW</p>
-            <h1 className="mt-2 text-4xl font-bold tracking-[-0.05em] sm:text-6xl">
-              Welcome, {greetingName}.
+            <span className="rounded-full border border-current/20 bg-black/10 px-3 py-1 font-mono text-xs uppercase tracking-widest opacity-80">
+              {role.replace('_', ' ')} WORKSPACE
+            </span>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Welcome back, {greetingName}.
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 opacity-80">
-              Live society operation indicators, tickets, and operational updates.
+            <p className="mt-2 text-sm opacity-80 max-w-xl">
+              {role === 'super_admin'
+                ? 'SocietySync operating layer active. Monitor resident registrations, employee duties, and billing ledgers.'
+                : role === 'resident'
+                ? 'Your residential portal is connected. Pay maintenance bills, issue digital guest passes, and access services.'
+                : 'Your staff portal is active. Check in for shift attendance, execute work tasks, and report completion.'}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {role === 'super_admin' && (
-              <Link
-                href="/dashboard/residents"
-                className="theme-button-primary inline-flex items-center gap-2 text-sm shadow-lg"
-              >
-                Manage Approvals {pendingResidents ? `(${pendingResidents})` : ''} <ArrowUpRight className="size-4" />
-              </Link>
-            )}
-
-            {role === 'resident' && (
-              <Link
-                href="/dashboard/service-requests"
-                className="theme-button-primary inline-flex items-center gap-2 text-sm shadow-lg"
-              >
-                Raise Request <ArrowUpRight className="size-4" />
-              </Link>
-            )}
-
-            {role === 'employee' && (
-              <Link
-                href="/dashboard/assigned-tasks"
-                className="theme-button-primary inline-flex items-center gap-2 text-sm shadow-lg"
-              >
-                View Tasks <ArrowUpRight className="size-4" />
-              </Link>
-            )}
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={role === 'super_admin' ? '/dashboard/residents' : role === 'resident' ? '/dashboard/visitor-pass' : '/dashboard/attendance'}
+              className="theme-button-primary inline-flex items-center justify-center gap-2 text-sm font-bold shadow-lg"
+            >
+              Primary Actions <ArrowUpRight className="size-4" />
+            </Link>
           </div>
         </div>
 
-        {/* CLICKABLE DASHBOARD STATISTICS CARDS */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {role === 'super_admin' && (
-            <>
-              <Stat href="/dashboard/residents" icon={Users} label="Approved Residents" value={String(residentCount)} />
-              <Stat href="/dashboard/residents?status=pending" icon={ShieldAlert} label="Pending Approvals" value={String(pendingResidents)} highlight={Boolean(pendingResidents)} />
-              <Stat href="/dashboard/service-requests" icon={Wrench} label="Open Service Tickets" value={String(openTickets)} />
-              <Stat href="/dashboard/employees" icon={Building2} label="Active Employees" value={String(employeeCount)} />
-            </>
-          )}
-
-          {role === 'resident' && (
-            <>
-              <Stat href="/dashboard/my-flat" icon={Building2} label="Flat Assignment" value={profile.flat_number || 'Registered'} />
-              <Stat href="/dashboard/maintenance" icon={DollarSign} label="Pending Bills" value={String(userBills.length)} highlight={Boolean(userBills.length)} />
-              <Stat href="/dashboard/service-requests" icon={Wrench} label="Active Tickets" value={String(openTickets)} />
-              <Stat href="/dashboard/my-profile" icon={ShieldAlert} label="Account Status" value="Approved" />
-            </>
-          )}
-
-          {role === 'employee' && (
-            <>
-              <Stat href="/dashboard/profile" icon={CheckSquare} label="Designation" value={profile.designation || 'Staff'} />
-              <Stat href="/dashboard/assigned-tasks" icon={Wrench} label="Open Tickets" value={String(openTickets)} />
-              <Stat href="/dashboard/attendance" icon={Calendar} label="Work Shift" value="On Duty" />
-              <Stat href="/dashboard/attendance" icon={Clock} label="Attendance Log" value="Active" />
-            </>
-          )}
-        </div>
+        {/* CLICKABLE DASHBOARD STATS CARDS */}
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat href="/dashboard/residents" icon={Users} label="Approved Residents" value={residentCount.toString()} />
+          <Stat href="/dashboard/residents" icon={ShieldAlert} label="Pending Approvals" value={pendingResidents.toString()} highlight={pendingResidents > 0} />
+          <Stat href="/dashboard/service-requests" icon={Wrench} label="Open Service Tickets" value={openTickets.toString()} />
+          <Stat href="/dashboard/employees" icon={CheckSquare} label="Active Staff Members" value={employeeCount.toString()} />
+        </section>
 
         {/* DASHBOARD CONTENT GRID */}
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
@@ -135,7 +168,6 @@ export default async function DashboardPage() {
               <div className="mt-4 flex flex-col gap-3">
                 {recentAnnouncements.length ? (
                   recentAnnouncements.map((item) => {
-                    const createdDate = item.created_at ? new Date(item.created_at) : new Date()
                     return (
                       <Link key={item.id} href="/dashboard/announcements" className="rounded-2xl border border-current/15 bg-black/10 p-4 transition hover:bg-black/20 block">
                         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -143,7 +175,7 @@ export default async function DashboardPage() {
                             {item.target_role || item.priority || 'Notice'}
                           </span>
                           <span className="text-[11px] font-mono opacity-70">
-                            {createdDate.toLocaleDateString()} at {createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {formatISTDateTime(item.created_at)}
                           </span>
                         </div>
                         <h3 className="mt-2 text-base font-semibold">{item.title}</h3>
@@ -170,7 +202,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* REDESIGNED MODERN GLASSMORPHISM WORKSPACE CARD */}
+          {/* CONNECTED WORKSPACE CARD */}
           <div className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 p-8 shadow-2xl backdrop-blur-2xl transition duration-300 hover:scale-[1.01] flex flex-col justify-between border-opacity-30">
             <div className="absolute -right-12 -top-12 size-40 rounded-full bg-current/10 blur-3xl" />
             <div className="relative z-10">

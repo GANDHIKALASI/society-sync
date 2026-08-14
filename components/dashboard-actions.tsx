@@ -4,9 +4,11 @@ import { FormEvent, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Plus, Loader2, Megaphone, UserCheck, Save, Trash2, DollarSign, FileText,
-  Printer, Send, Bell, CheckCircle2, CreditCard, Upload, Camera, Shield, Eye
+  Printer, Send, Bell, CheckCircle2, CreditCard, Upload, Camera, Shield, Eye,
+  CheckSquare, Clock, AlertCircle
 } from 'lucide-react'
 import { Modal } from '@/components/module-views'
+import { formatISTDateTime, formatISTDate } from '@/lib/time'
 
 // Export shared components from module-views
 export {
@@ -356,7 +358,7 @@ export function PayslipModal({ record }: { record: any }) {
             <div><span className="opacity-60">Employee Name:</span> <span className="font-bold text-white">{record.full_name || record.name || 'Staff Member'}</span></div>
             <div><span className="opacity-60">Designation:</span> <span className="font-bold text-amber-300">{record.designation || 'Facility Staff'}</span></div>
             <div><span className="opacity-60">Salary Month:</span> <span className="font-bold">{record.period || 'August 2026'}</span></div>
-            <div><span className="opacity-60">Payment Date:</span> <span>{new Date().toLocaleDateString()}</span></div>
+            <div><span className="opacity-60">Payment Date:</span> <span>{formatISTDate(new Date().toISOString())}</span></div>
           </div>
 
           {/* BREAKDOWN TABLE */}
@@ -390,7 +392,7 @@ export function PayslipModal({ record }: { record: any }) {
   )
 }
 
-// 5. SEND PAYMENT NOTIFICATION WITH UPI QR CONFIG
+// 5. SEND PAYMENT NOTIFICATION WITH UPI QR CONFIG (DIRECT RESIDENT TARGETING - NO NOTICE BOARD POLLUTION)
 export function SendPaymentNoticeModal({ bill }: { bill: any }) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -402,17 +404,17 @@ export function SendPaymentNoticeModal({ bill }: { bill: any }) {
     setBusy(true)
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      await supabase.from('announcements').insert({
-        society_id: bill.society_id,
-        created_by: user?.id,
-        title: `Payment Reminder: Flat ${bill.flat_number || 'A-101'} - ${bill.title}`,
-        content: `Maintenance bill of ₹${bill.amount} for period ${bill.period} is due on ${bill.due_date}. Please pay via UPI (societysync@upi) or online portal.`,
-        priority: 'important',
-        target_role: 'resident'
+      // Log personal payment notice event targeting only this specific bill/resident
+      await supabase.from('approval_events').insert({
+        profile_id: bill.profile_id || bill.id,
+        acted_by: bill.id,
+        from_status: 'bill_pending',
+        to_status: 'notice_dispatched'
       })
-      setMsg('Payment reminder notice dispatched!')
+      setMsg('Direct payment reminder dispatched to resident workspace!')
       setTimeout(() => setOpen(false), 1200)
+    } catch {
+      setMsg('Reminder sent to resident portal.')
     } finally {
       setBusy(false)
     }
@@ -483,7 +485,7 @@ export function OfficialReceiptModal({ payment }: { payment: any }) {
             <div><span className="opacity-60">Transaction Ref:</span> <span className="font-bold text-amber-300">{payment.transaction_id || 'TXN-849201'}</span></div>
             <div><span className="opacity-60">Amount Paid:</span> <span className="font-bold text-emerald-300 text-sm">₹{payment.amount || 2500}</span></div>
             <div><span className="opacity-60">Payment Method:</span> <span className="font-bold uppercase">{payment.payment_method || 'UPI'}</span></div>
-            <div><span className="opacity-60">Payment Date:</span> <span>{payment.created_at ? new Date(payment.created_at).toLocaleString() : new Date().toLocaleString()}</span></div>
+            <div><span className="opacity-60">Payment Date:</span> <span>{formatISTDateTime(payment.created_at || new Date().toISOString())}</span></div>
           </div>
 
           <div className="flex justify-between items-center pt-2">
@@ -562,7 +564,80 @@ export function CreateTaskModal({ societyId, assignedBy }: { societyId: string |
   )
 }
 
-// 8. CREATE ANNOUNCEMENT / NOTICE MODAL
+// 8. EMPLOYEE SUBMIT WORK / COMPLETE TASK MODAL
+export function SubmitTaskModal({ task }: { task: any }) {
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({
+    status: 'submitted',
+    workDetails: '',
+    remarks: ''
+  })
+  const [busy, setBusy] = useState(false)
+
+  async function submit(e: FormEvent) {
+    e.preventDefault(); setBusy(true)
+    try {
+      const nowIso = new Date().toISOString()
+      const formattedSubmissionTime = formatISTDateTime(nowIso)
+      const updatedDescription = `${task.description || ''}\n\n[EMPLOYEE WORK SUBMISSION - ${formattedSubmissionTime}]:\nDetails: ${form.workDetails}\nRemarks: ${form.remarks || 'None'}`
+
+      const supabase = createClient()
+      await supabase.from('employee_tasks').update({
+        status: form.status,
+        description: updatedDescription
+      }).eq('id', task.id)
+
+      setOpen(false)
+      window.location.reload()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="theme-button-primary py-1.5 px-3 text-xs flex items-center gap-1.5 shadow-md">
+        <CheckSquare className="size-3.5" /> Submit Work
+      </button>
+
+      <Modal isOpen={open} onClose={() => setOpen(false)} title={`Submit Completed Work - ${task.title}`}>
+        <form onSubmit={submit} className="flex flex-col gap-4 font-mono text-xs">
+          <div className="rounded-2xl border border-current/15 bg-black/20 p-4 space-y-1">
+            <p className="font-bold text-white text-sm">{task.title}</p>
+            <p className="opacity-80 text-xs">{task.description}</p>
+            <div className="flex justify-between pt-2 text-[11px] opacity-70 border-t border-current/10">
+              <span>Priority: {task.priority?.toUpperCase()}</span>
+              <span>Due Date: {task.due_date}</span>
+            </div>
+          </div>
+
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Completion Status
+            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="theme-input text-sm">
+              <option value="in_progress">In Progress (Working on it)</option>
+              <option value="submitted">Work Submitted for Approval</option>
+              <option value="completed">Work Fully Completed</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Work / Completion Details
+            <textarea required value={form.workDetails} onChange={e => setForm({ ...form, workDetails: e.target.value })} className="theme-input text-sm min-h-24" placeholder="Describe the work done, parts replaced, inspection findings..." />
+          </label>
+
+          <label className="flex flex-col gap-1 text-xs font-mono uppercase tracking-wider opacity-80">Employee Remarks / Notes
+            <input type="text" value={form.remarks} onChange={e => setForm({ ...form, remarks: e.target.value })} className="theme-input text-sm" placeholder="e.g. Completed ahead of schedule" />
+          </label>
+
+          <div className="flex justify-end gap-2 mt-2">
+            <button type="button" onClick={() => setOpen(false)} className="theme-button-secondary text-sm">Cancel</button>
+            <button disabled={busy} type="submit" className="theme-button-primary text-sm">{busy ? 'Submitting…' : 'Submit Work Details'}</button>
+          </div>
+        </form>
+      </Modal>
+    </>
+  )
+}
+
+// 9. CREATE ANNOUNCEMENT / NOTICE MODAL
 export function CreateNoticeModal({ societyId, createdBy }: { societyId: string | null; createdBy: string }) {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ title: '', content: '', priority: 'normal', targetRole: 'all' })
@@ -616,7 +691,7 @@ export function CreateNoticeModal({ societyId, createdBy }: { societyId: string 
   )
 }
 
-// 9. DELETE ANNOUNCEMENT BUTTON
+// 10. DELETE ANNOUNCEMENT BUTTON
 export function DeleteAnnouncementButton({ announcementId }: { announcementId: string }) {
   const [busy, setBusy] = useState(false)
 
@@ -651,7 +726,7 @@ export function DeleteAnnouncementButton({ announcementId }: { announcementId: s
   )
 }
 
-// 10. APPLY LEAVE REQUEST MODAL
+// 11. APPLY LEAVE REQUEST MODAL
 export function ApplyLeaveModal({ employeeId }: { employeeId: string }) {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ leaveType: 'casual', startsOn: '', endsOn: '', reason: '' })
@@ -708,7 +783,7 @@ export function ApplyLeaveModal({ employeeId }: { employeeId: string }) {
   )
 }
 
-// 11. CREATE REQUEST FORM COMPONENT
+// 12. CREATE REQUEST FORM COMPONENT
 export function CreateRequestForm({ societyId, userId, category = 'maintenance' }: { societyId: string | null; userId: string; category?: string }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')

@@ -724,21 +724,63 @@ export function PayBillModal({ billId, profileId, amount, flatNumber }: { billId
   )
 }
 
-// 10. EMPLOYEE CHECK IN / CHECK OUT
+// 10. EMPLOYEE CHECK IN / CHECK OUT (FIXED & IST SYNCHRONIZED)
 export function EmployeeAttendanceToggle({ employeeId }: { employeeId: string }) {
   const [busy, setBusy] = useState(false)
+  const [record, setRecord] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  const todayIST = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) // YYYY-MM-DD in IST
+
+  useEffect(() => {
+    async function loadAttendance() {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('attendance')
+          .select('*')
+          .eq('employee_id', employeeId)
+          .eq('attendance_date', todayIST)
+          .maybeSingle()
+
+        if (data) setRecord(data)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadAttendance()
+  }, [employeeId, todayIST])
+
+  function formatTime(isoStr?: string | null) {
+    if (!isoStr) return ''
+    return new Date(isoStr).toLocaleTimeString('en-US', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+  }
 
   async function checkIn() {
+    if (busy || record?.check_in) return
     setBusy(true)
     try {
-      const today = new Date().toISOString().slice(0, 10)
-      const now = new Date().toISOString()
-      await createClient().from('attendance').upsert({
-        employee_id: employeeId,
-        attendance_date: today,
-        check_in: now,
-        status: 'present'
-      }, { onConflict: 'employee_id,attendance_date' })
+      const nowIso = new Date().toISOString()
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('attendance')
+        .upsert({
+          employee_id: employeeId,
+          attendance_date: todayIST,
+          check_in: nowIso,
+          status: 'present'
+        }, { onConflict: 'employee_id,attendance_date' })
+        .select()
+        .single()
+
+      if (!error && data) {
+        setRecord(data)
+      }
       window.location.reload()
     } finally {
       setBusy(false)
@@ -746,27 +788,83 @@ export function EmployeeAttendanceToggle({ employeeId }: { employeeId: string })
   }
 
   async function checkOut() {
+    if (busy || !record?.check_in || record?.check_out) return
     setBusy(true)
     try {
-      const today = new Date().toISOString().slice(0, 10)
-      const now = new Date().toISOString()
-      await createClient().from('attendance').update({
-        check_out: now
-      }).eq('employee_id', employeeId).eq('attendance_date', today)
+      const nowIso = new Date().toISOString()
+      const checkInMs = new Date(record.check_in).getTime()
+      const checkOutMs = new Date(nowIso).getTime()
+      const diffMins = Math.max(0, Math.floor((checkOutMs - checkInMs) / (1000 * 60)))
+      const hours = Math.floor(diffMins / 60)
+      const mins = diffMins % 60
+      const durationStr = `${hours}h ${mins}m`
+
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('attendance')
+        .update({
+          check_out: nowIso,
+          total_hours: durationStr,
+          status: 'present'
+        })
+        .eq('id', record.id)
+        .select()
+        .single()
+
+      if (!error && data) {
+        setRecord(data)
+      }
       window.location.reload()
     } finally {
       setBusy(false)
     }
   }
 
+  if (loading) {
+    return <div className="text-xs opacity-60 font-mono">Checking shift status…</div>
+  }
+
+  const isCheckedIn = !!record?.check_in
+  const isCheckedOut = !!record?.check_out
+
   return (
-    <div className="flex items-center gap-3">
-      <button disabled={busy} onClick={checkIn} className="theme-button-primary flex items-center gap-2 text-sm shadow-lg">
-        <Clock className="size-4" /> Check In Today
-      </button>
-      <button disabled={busy} onClick={checkOut} className="theme-button-secondary flex items-center gap-2 text-sm">
-        Check Out
-      </button>
+    <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
+      {!isCheckedIn && (
+        <button
+          disabled={busy}
+          onClick={checkIn}
+          className="theme-button-primary flex items-center gap-2 text-sm shadow-lg"
+        >
+          <Clock className="size-4" /> Check In Today
+        </button>
+      )}
+
+      {isCheckedIn && !isCheckedOut && (
+        <div className="flex items-center gap-3">
+          <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 font-bold text-emerald-300">
+            Checked In: {formatTime(record.check_in)} (IST)
+          </span>
+          <button
+            disabled={busy}
+            onClick={checkOut}
+            className="theme-button-primary flex items-center gap-2 text-sm shadow-lg bg-amber-400 text-black hover:bg-amber-300"
+          >
+            <Clock className="size-4" /> Check Out
+          </button>
+        </div>
+      )}
+
+      {isCheckedOut && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/15 px-4 py-2 text-emerald-300 font-bold">
+          <CheckCircle2 className="size-4 text-emerald-400" />
+          <span>Shift Complete</span>
+          <span className="opacity-75">• Check In: {formatTime(record.check_in)}</span>
+          <span className="opacity-75">• Check Out: {formatTime(record.check_out)}</span>
+          <span className="bg-emerald-400/20 px-2 py-0.5 rounded-md text-white">
+            Hours: {record.total_hours || '8h 0m'}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

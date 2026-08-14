@@ -304,18 +304,22 @@ export function CommunityChat({ currentProfile }: { currentProfile: ProfileData 
     return text.includes(query) || sender.includes(query) || role.includes(query)
   })
 
-  // Format Date & Time
+  // Format Date & Time in IST
   function formatTimestamp(isoStr: string) {
     if (!isoStr) return ''
-    const d = new Date(isoStr)
-    const today = new Date()
-    const isToday = d.toDateString() === today.toDateString()
+    try {
+      const d = new Date(isoStr)
+      const todayIST = new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' })
+      const msgDateIST = d.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' })
+      const timeIST = d.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })
 
-    const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    if (isToday) {
-      return `Today at ${timeStr}`
+      if (todayIST === msgDateIST) {
+        return `Today at ${timeIST}`
+      }
+      return `${d.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short' })} at ${timeIST}`
+    } catch {
+      return isoStr
     }
-    return `${d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} at ${timeStr}`
   }
 
   // Helper for role badge styling
