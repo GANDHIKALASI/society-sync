@@ -51,6 +51,7 @@ const labels: Record<string, string> = {
   leave: 'Leave Applications',
   events: 'Society Events',
   announcements: 'Notice Board Announcements',
+  notifications: 'Personal Notifications & Alerts',
   documents: 'Document Repository',
   reports: 'Reports & Analytics',
   'activity-logs': 'System Activity Audit Logs',
@@ -71,18 +72,18 @@ const allowedByRole: Record<DashboardRole, string[]> = {
     'residents', 'employees', 'salary', 'blocks', 'flats', 'owners', 'tenants', 'visitors',
     'parking', 'vehicles', 'pets', 'maintenance', 'payments', 'receipts',
     'complaints', 'service-requests', 'employee-tasks', 'attendance', 'leave-approval',
-    'events', 'announcements', 'documents', 'reports', 'activity-logs',
+    'events', 'announcements', 'notifications', 'documents', 'reports', 'activity-logs',
     'settings', 'profile'
   ],
   resident: [
     'my-flat', 'my-profile', 'family-members', 'family', 'vehicles', 'pets',
     'maintenance', 'payments', 'receipts', 'complaints', 'service-requests',
-    'visitor-pass', 'visitors', 'events', 'documents', 'announcements',
+    'visitor-pass', 'visitors', 'events', 'documents', 'announcements', 'notifications',
     'chat', 'settings'
   ],
   employee: [
     'assigned-tasks', 'tasks', 'attendance', 'leave-request', 'leave',
-    'complaints', 'service-requests', 'documents', 'chat',
+    'complaints', 'service-requests', 'documents', 'notifications', 'chat',
     'profile', 'settings'
   ],
 }
@@ -172,6 +173,59 @@ export default async function DashboardModulePage({ params }: { params: Promise<
     } else if (module === 'announcements') {
       const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false })
       records = data || []
+    } else if (module === 'notifications') {
+      if (role === 'resident') {
+        const [{ data: bData }, { data: aData }] = await Promise.all([
+          supabase.from('maintenance_bills').select('*').eq('profile_id', profile.id).order('created_at', { ascending: false }),
+          supabase.from('announcements').select('*').order('created_at', { ascending: false })
+        ])
+        records = [
+          ...(bData || []).map(b => ({
+            id: b.id,
+            title: `Maintenance Fee Notice: ${b.title}`,
+            description: `Period: ${b.period} • Amount: ₹${b.amount} • Due: ${b.due_date}`,
+            status: b.status === 'paid' ? 'completed' : 'pending',
+            created_at: b.created_at
+          })),
+          ...(aData || []).map(a => ({
+            id: a.id,
+            title: a.title,
+            description: a.content,
+            status: 'approved',
+            created_at: a.created_at
+          }))
+        ]
+      } else if (role === 'employee') {
+        const [{ data: tData }, { data: aData }] = await Promise.all([
+          supabase.from('employee_tasks').select('*').eq('employee_id', profile.id).order('created_at', { ascending: false }),
+          supabase.from('announcements').select('*').order('created_at', { ascending: false })
+        ])
+        records = [
+          ...(tData || []).map(t => ({
+            id: t.id,
+            title: `Duty Task: ${t.title}`,
+            description: t.description,
+            status: t.status,
+            created_at: t.created_at
+          })),
+          ...(aData || []).map(a => ({
+            id: a.id,
+            title: a.title,
+            description: a.content,
+            status: 'approved',
+            created_at: a.created_at
+          }))
+        ]
+      } else {
+        const { data } = await supabase.from('approval_events').select('*').order('created_at', { ascending: false })
+        records = (data || []).map(e => ({
+          id: e.id,
+          title: `Audit Log Event: ${e.from_status} → ${e.to_status}`,
+          description: `Action logged by Admin ID: ${e.acted_by}`,
+          status: 'completed',
+          created_at: e.created_at
+        }))
+      }
     } else if (module === 'events') {
       const { data } = await supabase.from('events').select('*').order('created_at', { ascending: false })
       records = data || []
