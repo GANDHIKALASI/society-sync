@@ -5,11 +5,15 @@ export type Profile = {
   full_name: string
   phone: string | null
   role: 'super_admin' | 'resident' | 'employee'
-  status: 'pending' | 'approved' | 'rejected' | 'suspended'
+  status: 'pending' | 'approved' | 'rejected' | 'suspended' | 'banned'
   society_id: string | null
   block?: string
   flat_number?: string
   designation?: string
+  avatar_url?: string | null
+  email?: string | null
+  occupancy_type?: string | null
+  created_at?: string | null
 }
 
 export async function getCurrentProfile() {

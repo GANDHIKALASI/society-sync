@@ -6,6 +6,7 @@ import {
   CreateEmployeeModal,
   CreateBillModal,
   CreateVisitorPassModal,
+  VisitorPassQRModal,
   PayBillModal,
   EmployeeAttendanceToggle,
   CreateRequestForm,
@@ -13,7 +14,14 @@ import {
   CreateNoticeModal,
   DeleteAnnouncementButton,
   ApplyLeaveModal,
-  EditProfileForm
+  EditProfileForm,
+  ResidentProfileModal,
+  EmployeeProfileModal,
+  BanUnbanUserButton,
+  CreateSalaryModal,
+  PayslipModal,
+  SendPaymentNoticeModal,
+  OfficialReceiptModal
 } from '@/components/dashboard-actions'
 import Link from 'next/link'
 
@@ -85,6 +93,7 @@ export default async function DashboardModulePage({ params }: { params: Promise<
   const { profile, supabase } = await getCurrentProfile()
 
   if (!profile) redirect('/auth/login')
+  if (profile.status === 'banned') redirect('/auth/login')
   if (profile.status !== 'approved') redirect('/auth/pending')
 
   const role = profile.role as DashboardRole
@@ -194,7 +203,7 @@ export default async function DashboardModulePage({ params }: { params: Promise<
           <div>
             <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">{title}</h1>
             <p className="mt-2 text-sm leading-6 opacity-80">
-              {isProfilePage ? 'Manage your account details and profile preferences.' : `Live records and management tools for ${title.toLowerCase()}.`}
+              {isProfilePage ? 'Manage your account details, photo, and preferences.' : `Live records and management tools for ${title.toLowerCase()}.`}
             </p>
           </div>
 
@@ -208,6 +217,10 @@ export default async function DashboardModulePage({ params }: { params: Promise<
             {/* ACTION MODAL BUTTONS */}
             {role === 'super_admin' && module === 'employees' && (
               <CreateEmployeeModal societyId={profile.society_id} />
+            )}
+
+            {role === 'super_admin' && module === 'salary' && (
+              <CreateSalaryModal societyId={profile.society_id} />
             )}
 
             {role === 'super_admin' && module === 'maintenance' && (
@@ -293,15 +306,52 @@ export default async function DashboardModulePage({ params }: { params: Promise<
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        {role === 'super_admin' && module === 'residents' && rec.status === 'pending' && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* RESIDENT DETAILED PROFILE MODAL */}
+                        {(module === 'residents' || module === 'owners' || module === 'tenants') && (
+                          <ResidentProfileModal profile={rec} />
+                        )}
+
+                        {/* EMPLOYEE DETAILED PROFILE MODAL */}
+                        {(module === 'employees' || module === 'salary') && (
+                          <EmployeeProfileModal employee={rec} />
+                        )}
+
+                        {/* BAN / UNBAN CONTROLS */}
+                        {role === 'super_admin' && (module === 'residents' || module === 'owners' || module === 'tenants') && (
                           <ResidentApprovalActions profileId={rec.id} currentStatus={rec.status} />
                         )}
 
+                        {role === 'super_admin' && (module === 'employees' || module === 'salary') && rec.status !== 'pending' && (
+                          <BanUnbanUserButton profileId={rec.id} currentStatus={rec.status} role="employee" />
+                        )}
+
+                        {/* VISITOR PASS QR MODAL */}
+                        {(module === 'visitor-pass' || module === 'visitors') && (
+                          <VisitorPassQRModal pass={rec} />
+                        )}
+
+                        {/* SALARY PAYSLIP MODAL */}
+                        {module === 'salary' && (
+                          <PayslipModal record={rec} />
+                        )}
+
+                        {/* PAYMENT NOTICE REMINDER MODAL */}
+                        {role === 'super_admin' && module === 'maintenance' && rec.status === 'pending' && (
+                          <SendPaymentNoticeModal bill={rec} />
+                        )}
+
+                        {/* PAYMENT RECEIPT MODAL */}
+                        {module === 'receipts' && (
+                          <OfficialReceiptModal payment={rec} />
+                        )}
+
+                        {/* DELETE ANNOUNCEMENT BUTTON */}
                         {role === 'super_admin' && module === 'announcements' && (
                           <DeleteAnnouncementButton announcementId={rec.id} />
                         )}
 
+                        {/* RESIDENT PAY BILL MODAL */}
                         {role === 'resident' && module === 'maintenance' && rec.status === 'pending' && (
                           <PayBillModal
                             billId={rec.id}

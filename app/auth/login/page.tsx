@@ -67,6 +67,12 @@ export default function LoginPage() {
         return
       }
 
+      if (profile && profile.status === 'banned') {
+        setError('Your account has been banned by an administrator. Login access is disabled.')
+        setBusy(false)
+        return
+      }
+
       if (profile && (profile.status === 'rejected' || profile.status === 'suspended')) {
         setError('Your account access has been restricted by an administrator.')
         setBusy(false)
