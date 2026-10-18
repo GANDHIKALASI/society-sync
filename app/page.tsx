@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUpRight, Menu, ShieldCheck, Users, Wrench, MapPin, Phone, Mail, Send, Building2, Shield, Layers, Sparkles, CheckCircle2, KeyRound, MessageSquare, CreditCard, Clock, AlertCircle } from 'lucide-react'
+import { ArrowUpRight, Menu, ShieldCheck, Users, Wrench, MapPin, Phone, Mail, Send, Building2, Shield, Layers, Sparkles, CheckCircle2, KeyRound, MessageSquare, CreditCard, Clock, AlertCircle, Code2, BadgeCheck } from 'lucide-react'
 
 const videoUrl = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4'
 
@@ -31,6 +31,7 @@ export default function HomePage() {
               <a href="#home" className="hover:text-[#d7f36b] transition">Home</a>
               <a href="#about" className="hover:text-[#d7f36b] transition">About</a>
               <a href="#features" className="hover:text-[#d7f36b] transition">Features</a>
+              <a href="#developer" className="hover:text-[#d7f36b] transition">Developer</a>
               <a href="#contact" className="hover:text-[#d7f36b] transition">Contact</a>
             </div>
             <div className="flex items-center gap-3">
@@ -254,48 +255,212 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ULTRA-PREMIUM FOOTER */}
-      <footer className="border-t border-white/15 bg-[#041a18] px-6 py-10 text-sm text-white/80 sm:px-12 lg:px-20">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 sm:flex-row">
-          <div>
-            <p className="font-bold text-white tracking-wide">
-              SocietySync Infrastructure Networks
-            </p>
-            <p className="mt-1 text-xs text-white/60">
-              © 2026 SocietySync. Empowering Smart Gated Communities Across India. All Rights Reserved.
+      {/* MEET THE DEVELOPER & ARCHITECT SECTION */}
+      <section id="developer" className="relative overflow-hidden bg-[#051c1a] px-6 py-24 text-[#f3f0e5] sm:px-12 lg:px-20 border-t border-white/10">
+        <div className="pointer-events-none absolute -left-20 top-1/4 size-96 rounded-full bg-[#d7f36b]/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -right-20 bottom-1/4 size-96 rounded-full bg-[#153b32]/40 blur-[120px]" />
+
+        <div className="relative mx-auto max-w-7xl">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d7f36b]/30 bg-[#d7f36b]/10 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-[0.25em] text-[#d7f36b]">
+              <Sparkles className="size-3.5" /> Architect & Creator
+            </div>
+            <h2 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-6xl">
+              Meet the Mind Behind SocietySync
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+              Engineered and designed by <span className="font-semibold text-white">Gandhi Kalasi</span> — fusing modern full-stack web architecture, AI agent systems, and mission-critical community infrastructure.
             </p>
           </div>
 
-          {/* SOCIAL MEDIA LINKS */}
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
-            <a
-              href="https://instagram.com/bug_gandhi"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
-            >
-              <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              Instagram
-            </a>
+          <div className="mt-14 overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-transparent p-8 shadow-2xl backdrop-blur-2xl sm:p-12 lg:grid lg:grid-cols-12 lg:gap-12 lg:items-center">
+            {/* Developer Portrait */}
+            <div className="relative mx-auto max-w-sm lg:col-span-5">
+              <div className="group relative aspect-square overflow-hidden rounded-3xl border-2 border-white/20 bg-black/40 shadow-2xl ring-1 ring-[#d7f36b]/30 transition duration-500 hover:border-[#d7f36b]/60 hover:shadow-[0_0_40px_rgba(215,243,107,0.25)]">
+                <img
+                  src="/gandhi-profile.jpg"
+                  alt="Gandhi Kalasi - AI Product Engineer & Full-Stack Developer"
+                  className="size-full object-cover transition duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl border border-white/15 bg-black/70 px-4 py-3 backdrop-blur-md">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-bold text-sm text-white">Gandhi Kalasi</p>
+                      <BadgeCheck className="size-4 text-[#d7f36b]" />
+                    </div>
+                    <p className="text-[11px] font-mono text-white/60">Bhubaneswar, India</p>
+                  </div>
+                  <span className="rounded-full bg-[#d7f36b] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[#082725]">
+                    Lead Architect
+                  </span>
+                </div>
+              </div>
+            </div>
 
-            <a
-              href="https://t.me/bug_gandhi"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
-            >
-              <Send className="size-4" /> Telegram
-            </a>
+            {/* Developer Info & Bio */}
+            <div className="mt-8 lg:col-span-7 lg:mt-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d7f36b]/30 bg-[#d7f36b]/10 px-3.5 py-1 font-mono text-xs font-semibold text-[#d7f36b]">
+                  <Code2 className="size-3.5" /> AI Product Engineer Aspirant
+                </span>
+                <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 font-mono text-xs text-white/70">
+                  He / Him
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 font-mono text-xs text-emerald-300">
+                  <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" /> Available for Opportunities
+                </span>
+              </div>
 
-            <a
-              href="https://github.com/GANDHIKALASI"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
-            >
-              <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              GitHub
-            </a>
+              <h3 className="mt-5 text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
+                Gandhi Kalasi
+              </h3>
+
+              <p className="mt-3 font-mono text-xs leading-relaxed text-[#d7f36b] sm:text-sm">
+                AI Product Engineer Aspirant | Python Developer | LLMs & AI Agents | Building AI-Powered Products | Software Development
+              </p>
+
+              <p className="mt-5 text-sm leading-relaxed text-white/80 sm:text-base">
+                Passionate about developing AI-first products and resilient software solutions. Single-handedly designed, built, and deployed SocietySync as an end-to-end residential management platform featuring real-time WebSockets, multi-role security governance, automated maintenance ledger billing, and high-performance serverless routing.
+              </p>
+
+              {/* Core Skill Chips */}
+              <div className="mt-6">
+                <p className="text-xs font-mono uppercase tracking-wider text-white/50">Core Capabilities & Tech Stack</p>
+                <div className="mt-2.5 flex flex-wrap gap-2 text-xs font-mono">
+                  {['Python Developer', 'LLMs & AI Agents', 'AI-Powered Products', 'Next.js 16', 'TypeScript', 'Supabase Realtime', 'PostgreSQL', 'Tailwind CSS', 'Edge Middleware'].map((tech) => (
+                    <span key={tech} className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-white/90 hover:border-[#d7f36b]/50 hover:text-[#d7f36b] transition">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Social / Connect Action Buttons */}
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <a
+                  href="https://www.linkedin.com/in/gandhi-kalasi/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#0077b5] px-4 py-2.5 text-xs font-bold text-white shadow-lg hover:bg-[#006097] transition"
+                >
+                  <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.45 1.45 0 0 0 1.45-1.45 1.45 1.45 0 0 0-1.45-1.45 1.45 1.45 0 0 0 1.45 1.45m1.39 9.74v-8.37H5.07v8.37h2.78z"/></svg>
+                  LinkedIn Profile
+                </a>
+
+                <a
+                  href="https://github.com/GANDHIKALASI"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
+                >
+                  <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                  GitHub
+                </a>
+
+                <a
+                  href="https://t.me/bug_gandhi"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
+                >
+                  <Send className="size-4 text-[#26A5E4]" /> Telegram
+                </a>
+
+                <a
+                  href="mailto:gandhikalasi115@gmail.com"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#d7f36b] px-4 py-2.5 text-xs font-bold text-[#082725] hover:bg-[#e7fb91] transition shadow-md"
+                >
+                  <Mail className="size-4" /> Email Gandhi
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ULTRA-PREMIUM FOOTER */}
+      <footer className="border-t border-white/15 bg-[#041a18] px-6 py-12 text-sm text-white/80 sm:px-12 lg:px-20">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8">
+          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <div>
+              <p className="font-bold text-white tracking-wide text-base">
+                Society<span className="text-[#d7f36b]">Sync</span> Infrastructure Networks
+              </p>
+              <p className="mt-1 text-xs text-white/60">
+                © 2026 SocietySync. Empowering Smart Gated Communities Across India. All Rights Reserved.
+              </p>
+            </div>
+
+            {/* SOCIAL MEDIA LINKS */}
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+              <a
+                href="https://www.linkedin.com/in/gandhi-kalasi/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
+              >
+                <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.45 1.45 0 0 0 1.45-1.45 1.45 1.45 0 0 0-1.45-1.45 1.45 1.45 0 0 0 1.45 1.45m1.39 9.74v-8.37H5.07v8.37h2.78z"/></svg>
+                LinkedIn
+              </a>
+
+              <a
+                href="https://github.com/GANDHIKALASI"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
+              >
+                <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub
+              </a>
+
+              <a
+                href="https://instagram.com/bug_gandhi"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
+              >
+                <svg className="size-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                Instagram
+              </a>
+
+              <a
+                href="https://t.me/bug_gandhi"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-white/90 hover:border-[#d7f36b] hover:text-[#d7f36b] transition"
+              >
+                <Send className="size-4" /> Telegram
+              </a>
+            </div>
+          </div>
+
+          {/* DEVELOPER CREDIT BADGE IN FOOTER */}
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row">
+            <div className="flex items-center gap-3">
+              <img
+                src="/gandhi-profile.jpg"
+                alt="Gandhi Kalasi"
+                className="size-8 rounded-full object-cover ring-2 ring-[#d7f36b]/60"
+              />
+              <p className="text-xs text-white/75">
+                Architected & Built by{' '}
+                <a
+                  href="https://www.linkedin.com/in/gandhi-kalasi/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-bold text-[#d7f36b] hover:underline"
+                >
+                  Gandhi Kalasi
+                </a>{' '}
+                — AI Product Engineer & Full-Stack Developer
+              </p>
+            </div>
+
+            <p className="font-mono text-[11px] text-white/50">
+              Built with Next.js 16, Supabase Realtime & TypeScript
+            </p>
           </div>
         </div>
       </footer>

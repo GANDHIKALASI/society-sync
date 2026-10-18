@@ -126,7 +126,7 @@ export function DashboardShell({ role, name, children }: { role: DashboardRole; 
           <span>{role.replace('_', ' ')}</span>
         </div>
 
-        <nav className="mt-4 flex max-h-[calc(100vh-200px)] flex-col gap-1 overflow-y-auto pr-1">
+        <nav className="mt-4 flex max-h-[calc(100vh-250px)] flex-col gap-1 overflow-y-auto pr-1">
           {navItems.map((item) => {
             const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
             const Icon = item.icon
@@ -148,11 +148,35 @@ export function DashboardShell({ role, name, children }: { role: DashboardRole; 
           })}
         </nav>
 
+        {/* Developer Credit in Sidebar */}
+        <div className="absolute bottom-18 left-5 right-5 rounded-2xl border border-current/15 bg-white/5 p-2.5 backdrop-blur-md">
+          <a
+            href="https://www.linkedin.com/in/gandhi-kalasi/"
+            target="_blank"
+            rel="noreferrer"
+            className="group flex items-center gap-2.5 transition hover:opacity-90"
+            title="View Gandhi Kalasi on LinkedIn"
+          >
+            <img
+              src="/gandhi-profile.jpg"
+              alt="Gandhi Kalasi"
+              className="size-8 rounded-full object-cover ring-2 ring-[var(--primary)] shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1">
+                <p className="truncate text-xs font-bold leading-tight group-hover:underline">Gandhi Kalasi</p>
+                <span className="text-[10px] text-[var(--primary)] font-bold">✓</span>
+              </div>
+              <p className="truncate text-[10px] font-mono opacity-65">AI Product Engineer</p>
+            </div>
+          </a>
+        </div>
+
         <button
           onClick={logout}
-          className="absolute bottom-6 left-5 right-5 flex items-center justify-center gap-2 rounded-xl border border-current/20 py-2.5 text-sm font-semibold opacity-80 hover:bg-white/10 hover:opacity-100"
+          className="absolute bottom-5 left-5 right-5 flex items-center justify-center gap-2 rounded-xl border border-current/20 py-2 text-xs font-semibold opacity-80 hover:bg-white/10 hover:opacity-100"
         >
-          <LogOut className="size-4" /> Log out
+          <LogOut className="size-3.5" /> Log out
         </button>
       </aside>
 
